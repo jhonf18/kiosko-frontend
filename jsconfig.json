@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": [
+        "./*"
+      ],
+      "@/*": [
+        "./*"
+      ],
+      "~~/*": [
+        "./*"
+      ],
+      "@@/*": [
+        "./*"
+      ]
+    },
+    "allowJs": true
+  },
+  "exclude": [
+    "node_modules",
+    ".nuxt",
+    "dist"
+  ],
+  "vueCompilerOptions": {
+    "target": 2.7
+  }
+}

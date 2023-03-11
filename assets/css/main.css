@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+  font-family: 'Montserrat'
+}
+
+body::-webkit-scrollbar {
+  @apply block w-2.5 h-2;
+}
+
+body::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded;
+}
+
+body::-webkit-scrollbar-track {
+  @apply bg-gray-200 rounded;
+}
