@@ -1,12 +1,8 @@
 <template>
   <main
-    class="min-h-screen w-full bg-primary flex items-center justify-center transition-colors duration-200"
-    :class="step === 1 ? 'bg-white' : 'bg-primary'"
+    class="min-h-screen w-full flex items-center justify-center transition-colors duration-200"
   >
-    <Transition name="bounce">
-      <Logotype v-if="showLogotype"></Logotype>
-    </Transition>
-    <LoginForm v-if="step === 1"></LoginForm>
+    <LoginForm></LoginForm>
   </main>
 </template>
 
@@ -17,23 +13,6 @@ export default {
   name: 'LoginPage',
   components: {
     LoginForm,
-  },
-  data() {
-    return {
-      step: 1,
-      showLogotype: false,
-    }
-  },
-  mounted() {
-    // setTimeout(() => {
-    //   this.showLogotype = true
-    // }, 50)
-    // setTimeout(() => {
-    //   this.showLogotype = false
-    // }, 1100)
-    // setTimeout(() => {
-    //   this.step = 1
-    // }, 1700)
   },
   head() {
     return {

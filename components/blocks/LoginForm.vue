@@ -78,14 +78,25 @@ export default {
   },
   data() {
     return {
-      step: 1,
+      step: 0,
       nickname: '',
       password: '',
       rememberUser: false,
     }
   },
   methods: {
-    signinUser() {},
+    async signinUser() {
+      try {
+        await this.$auth.loginWith('local', {
+          data: { nickname: this.nickname, password: this.password },
+        })
+      } catch (err) {
+        console.log(
+          '🚀 ~ file: index.vue:25 ~ signinUser ~ err:',
+          err.response.data.error
+        )
+      }
+    },
   },
 }
 </script>

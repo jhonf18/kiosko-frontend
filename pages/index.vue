@@ -12,21 +12,32 @@ export default {
   data() {
     return {
       nickname: '',
-      password: ''
-    };
+      password: '',
+    }
   },
   methods: {
     async signinUser() {
+      console.log('Signin user')
       try {
         const result = await this.$auth.loginWith('local', {
-          data: { nickname: this.nickname, password: this.password }
-        });
-        console.log('🚀 ~ file: index.vue:21 ~ signinUser ~ result:', JSON.stringify(result));
+          data: { nickname: this.nickname, password: this.password },
+        })
+        console.log(this.$user)
+        console.log(
+          '🚀 ~ file: index.vue:21 ~ signinUser ~ result:',
+          JSON.stringify(result)
+        )
       } catch (err) {
-        console.log('🚀 ~ file: index.vue:25 ~ signinUser ~ err:', err.response.data.error);
-        console.log('🚀 ~ file: index.vue:22 ~ signinUser ~ err:', JSON.stringify(err));
+        console.log(
+          '🚀 ~ file: index.vue:25 ~ signinUser ~ err:',
+          err.response.data.error
+        )
+        console.log(
+          '🚀 ~ file: index.vue:22 ~ signinUser ~ err:',
+          JSON.stringify(err)
+        )
       }
-    }
-  }
-};
+    },
+  },
+}
 </script>

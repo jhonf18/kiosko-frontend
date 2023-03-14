@@ -146,6 +146,12 @@ export default {
         },
       },
     },
+    redirect: {
+      home: '/redirect',
+      login: '/login',
+      logout: '/login',
+    },
+    fullPathRedirect: true,
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
