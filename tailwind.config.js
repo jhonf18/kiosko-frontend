@@ -55,6 +55,11 @@ module.exports = {
       },
       width: {
         68: '17rem',
+        76: '19rem',
+        'full-1rem': 'calc(100% - 1rem)',
+      },
+      maxHeight: {
+        '1rem': 'calc(100vh - 1rem)',
       },
       spacing: {
         18: '4.5rem',

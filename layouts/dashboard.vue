@@ -13,7 +13,7 @@
               @click="showLateralMenu = !showLateralMenu"
               class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
             >
-              <span class="sr-only">Abrir sidebar</span>
+              <span class="sr-only">Abrir menu</span>
               <MenuIcon></MenuIcon>
             </button>
             <LogotypeNav></LogotypeNav>
@@ -35,18 +35,20 @@
               </span>
             </button>
             <div
-              class="z-50 absolute top-8 right-0 my-4 h-auto text-base overflow-hidden list-none transition-all bg-white divide-y divide-gray-100 rounded duration-300"
+              class="z-50 absolute top-8 right-0 my-4 h-auto text-base overflow-hidden list-none transition-all bg-white divide-y divide-gray-100 rounded duration-300 min-w-[200px]"
               :class="
                 openDropdown ? 'shadow-sm border max-h-[400px]' : 'max-h-0'
               "
             >
               <div class="px-4 py-3" role="none">
-                <p class="text-sm text-gray-900" role="none">Neil Sims</p>
+                <p class="text-sm text-gray-900" role="none">
+                  {{ `${$auth.user.name} (${$auth.user.nickname})` }}
+                </p>
                 <p
                   class="text-sm font-medium text-gray-900 truncate"
                   role="none"
                 >
-                  neil.sims@flowbite.com
+                  {{ $auth.user.email }}
                 </p>
               </div>
               <ul class="py-1" role="none">
@@ -78,7 +80,7 @@
 
     <aside
       id="logo-sidebar"
-      class="fixed top-0 left-0 z-20 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0"
+      class="fixed top-0 left-0 z-20 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0"
       aria-label="Sidebar"
       :class="!showLateralMenu ? '-translate-x-full' : 'translate-x-0'"
     >
@@ -119,9 +121,9 @@
       </div>
     </aside>
 
-    <main class="pt-18 sm:ml-64">
+    <main class="pt-18 md:ml-64">
       <div
-        class="absolute top-0 left-0 w-full h-full"
+        class="absolute top-0 left-0 w-full h-full lg:hidden"
         :class="{
           'aside-menu-visible bg-aside-menu min-h-screen': showLateralMenu,
           'aside-menu-invisible': !showLateralMenu,
@@ -135,7 +137,11 @@
 
 <script>
 const navigation = [
-  { name: 'Pedidos', componentIcon: 'OrdersIcon', route: '/dashboard/' },
+  {
+    name: 'Sucursales',
+    componentIcon: 'BranchOfficeIcon',
+    route: '/dashboard/',
+  },
   { name: 'Usuarios', componentIcon: 'UsersIcon', route: '/dashboard/users' },
   {
     name: 'Productos',
@@ -160,7 +166,7 @@ export default {
     UsersIcon: () => import('@/static/icons/users.svg?inline'),
     ProductIcon: () => import('@/static/icons/product.svg?inline'),
     CategoryIcon: () => import('@/static/icons/category.svg?inline'),
-    OrdersIcon: () => import('@/static/icons/orders.svg?inline'),
+    BranchOfficeIcon: () => import('@/static/icons/branchOffice.svg?inline'),
     StatisticsIcon: () => import('@/static/icons/statistics.svg?inline'),
     SignoutIcon: () => import('@/static/icons/signout.svg?inline'),
     MenuIcon: () => import('@/static/icons/menu.svg?inline'),

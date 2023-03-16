@@ -2,9 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-
 body {
-  font-family: 'Montserrat'
+  font-family: 'Montserrat';
 }
 
 body::-webkit-scrollbar {
@@ -17,4 +16,16 @@ body::-webkit-scrollbar-thumb {
 
 body::-webkit-scrollbar-track {
   @apply bg-gray-200 rounded;
+}
+
+@layer utilities {
+  .bg-light-background {
+    background-color: #fafbff;
+  }
+  .w-full-1-rem {
+    width: calc(100% - 1rem);
+  }
+  .max-h-1-rem {
+    height: calc(100vh - 1rem);
+  }
 }

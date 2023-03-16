@@ -42,10 +42,10 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: ['@/assets/css/general', '@/assets/css/main.css'],
+  css: ['@/assets/css/main.css', '@/assets/css/general.css'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: ['@/plugins/repository.js'],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   // Auto import components: https://go.nuxtjs.dev/config-components

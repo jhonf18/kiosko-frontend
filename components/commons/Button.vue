@@ -50,7 +50,7 @@ export default {
 
 /* ------------ sizes styles ---------- */
 .button-sm {
-  @apply px-3 py-3 text-xs;
+  @apply px-3 py-2 text-xs;
 }
 
 .button-md {
