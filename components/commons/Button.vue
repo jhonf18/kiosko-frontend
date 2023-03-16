@@ -62,7 +62,7 @@ export default {
 }
 
 .button-block {
-  @apply w-full py-4 text-center block;
+  @apply w-full py-2 text-center block;
 }
 
 .button-lg-block {

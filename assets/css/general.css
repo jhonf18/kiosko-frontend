@@ -1,3 +1,7 @@
 input {
   outline: none;
 }
+
+.full-screen-dashboard {
+  height: calc(100vh - 73.25px);
+}
