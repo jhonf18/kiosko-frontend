@@ -2,7 +2,7 @@
   <Modal
     :id="`modal-${nameRef}-${id}`"
     :ref="`modal-${nameRef}-${id}`"
-    title="Agregar una nueva sucursal"
+    title="Editar sucursal"
     size="lg"
     :footer="false"
   >
@@ -24,7 +24,62 @@
       ></Input>
     </div>
     <div>
-      <h5 class="font-medium mb-2">Agregar empleados</h5>
+      <h5 class="font-medium mt-4">Empleados actuales en la sucursal</h5>
+      <div class="relative overflow-x-auto w-full max-w-full">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-t bg-gray-100">
+              <th scope="col" class="text-center text-sm p-3 w-5">
+                <input
+                  class="w-4 h-4 text-primary-light rounded form-checkbox focus:ring-primary-light cursor-pointer"
+                  type="checkbox"
+                  value=""
+                />
+              </th>
+              <th
+                scope="col"
+                class="text-left text-gray-700 font-medium uppercase text-sm p-3 w-6/12 min-w-[250px]"
+              >
+                Nombre
+              </th>
+              <th
+                class="text-left text-gray-700 font-medium uppercase text-sm w-28 p-3"
+              >
+                Posición
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="employee in branchOffice.employees"
+              class="border-b bg-white hover:bg-gray-100"
+            >
+              <th scope="col" class="text-center text-sm p-3">
+                <input
+                  class="w-4 h-4 text-primary-light rounded form-checkbox focus:ring-primary-light cursor-pointer"
+                  type="checkbox"
+                  :value="employee.id"
+                  v-model="branchOffice.selectedEmployees"
+                />
+              </th>
+              <td class="flex flex-col p-3">
+                <span class="font-semibold text-sm md:text-base">
+                  {{ employee.name }}
+                </span>
+                <span class="text-gray-700 text-xs md:text-sm">
+                  {{ employee.nickname }}
+                </span>
+              </td>
+              <td class="p-3 text-sm">
+                <span class="">{{ employee.role | roleName }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <h5 class="font-medium mb-2 mt-4">Agregar empleados</h5>
       <div class="relative overflow-x-auto w-full max-w-full">
         <table class="w-full">
           <thead>
@@ -80,9 +135,9 @@
     </div>
     <div class="flex justify-end mt-8 mb-2">
       <ButtonWithSpinner
-        @click="createBranchOffice"
         :loading="loading"
         :text="button.text"
+        @click="editBranchOffice"
       ></ButtonWithSpinner>
     </div>
     <Toast
@@ -103,26 +158,40 @@ import { formatErrorMessages } from '@/assets/utils/formatErrorMessage'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { branchOfficeStoreNames } from '~/store/branchOffice'
 import { userStoreNames } from '~/store/user'
-const nameRef = 'add-branch-office'
+const nameRef = 'edit-branch-office'
 
 export default {
-  name: 'ModalAddBranchOffice',
+  name: 'ModalEditBranchOffice',
   props: {
     id: {
       type: String,
       required: true,
     },
+    branchOfficeStore: {
+      type: Object,
+      required: true,
+      default: () => ({
+        id: '',
+        name: '',
+        address: '',
+        employees: [],
+        selectedEmployees: [],
+      }),
+    },
   },
   data() {
     return {
+      users: [],
+      loading: false,
       branchOffice: {
+        id: '',
         name: '',
         address: '',
+        employees: [{ rol: '' }],
         selectedEmployees: [],
       },
-      users: [],
       button: {
-        text: 'Crear sucursal',
+        text: 'Editar sucursal',
       },
       toast: {
         type: 'error',
@@ -130,7 +199,6 @@ export default {
         visibleTime: 3,
       },
       nameRef,
-      loading: false,
     }
   },
   computed: {
@@ -138,15 +206,21 @@ export default {
       usersStore: userStoreNames.getters.get,
     }),
   },
+  async created() {
+    if (!this.usersStore) {
+      await this.loadUsers()
+    }
+  },
   methods: {
     ...mapActions({
       loadUsers: userStoreNames.actions.load,
     }),
     ...mapMutations({
       addBranchOffice: branchOfficeStoreNames.mutations.add,
+      updateBranchOffice: branchOfficeStoreNames.mutations.update,
       updateUsers: userStoreNames.mutations.update,
     }),
-    async createBranchOffice() {
+    async editBranchOffice() {
       if (this.loading) return
 
       const fields = ['name', 'address']
@@ -158,45 +232,49 @@ export default {
       }
 
       try {
-        const branchOffice = await this.$branchOfficeRepository.create({
-          name: this.branchOffice.name,
-          address: this.branchOffice.address,
-          employees: this.branchOffice.selectedEmployees,
-        })
+        this.isLoading(true)
+        const branchOffice = await this.$branchOfficeRepository.update(
+          this.branchOffice.id,
+          {
+            name: this.branchOffice.name,
+            address: this.branchOffice.address,
+            employees: this.branchOffice.selectedEmployees,
+          }
+        )
 
-        this.addBranchOffice(branchOffice)
+        this.updateBranchOffice(branchOffice)
         this.updateUsers({
           usersIDS: this.branchOffice.selectedEmployees,
           branchOffice: { id: branchOffice.id, name: branchOffice.name },
         })
 
         this.$refs[`modal-${this.nameRef}-${this.id}`].closeByButton()
+        this.isLoading(false)
       } catch (err) {
         const messages = err.message
         this.toast.message = formatErrorMessages(messages)
         return this.$refs[`toast-${this.nameRef}`].show()
       }
     },
-    isLoading(state) {
-      if (state) this.button.text = 'Creando ...'
-      else this.button.text = 'Crear sucursal'
-
-      this.loading = state
-    },
-    async setUsers() {
-      if (!this.usersStore) {
-        await this.loadUsers()
-      }
-      this.users = this.usersStore.filter((user) => {
-        return user.role !== 'ROLE_ADMIN' && !user.branch_office
-      })
-    },
-    async open() {
+    open() {
       this.$refs[`modal-${this.nameRef}-${this.id}`].open()
-      await this.setUsers()
+    },
+    isLoading(state) {
+      if (!state) this.button.text = 'Editar sucursal'
+      else this.button.text = 'Editando ...'
+      this.loading = state
     },
   },
   watch: {
+    branchOfficeStore: {
+      handler() {
+        this.branchOffice = { ...this.branchOfficeStore }
+        this.branchOffice.selectedEmployees = []
+        this.branchOffice.selectedEmployees =
+          this.branchOfficeStore.employees.map((e) => e.id)
+      },
+      inmmediate: true,
+    },
     usersStore: {
       handler() {
         this.users = this.usersStore.filter((user) => {

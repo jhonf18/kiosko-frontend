@@ -1,4 +1,5 @@
 import { branchOfficeRepository } from './branchOfficeRepository.js'
+import { userRepository } from './userRepository.js'
 
 export class Repository {
   constructor($axios) {
@@ -7,5 +8,9 @@ export class Repository {
 
   getBranchOfficeRepository() {
     return branchOfficeRepository(this.$axios)
+  }
+
+  getUserRepository() {
+    return userRepository(this.$axios)
   }
 }

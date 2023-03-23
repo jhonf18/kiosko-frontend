@@ -37,12 +37,14 @@
             type="email"
             placeholder="Ingresa tu nombre de usuario"
             class="mb-4"
+            size="lg"
           />
           <Input
             v-model="password"
             id-input="login-password"
             type="password"
             placeholder="Ingresa tu contraseña"
+            size="lg"
           />
           <div class="mt-5 flex items-center">
             <input

@@ -14,13 +14,15 @@
           :value="value"
           :type="input.type"
           :placeholder="placeholder"
-          class="px-4 py-4 text-base border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
+          class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
           :class="{
             'error-input':
               onError === 'empty' ||
               onError === 'not-equal' ||
               (onError === 'invalid' && type !== 'password'),
             'warning-input-pwd': onError === 'invalid' && type === 'password',
+            'py-2.5 text-sm': size === 'md',
+            'py-4 text-base': size === 'lg',
           }"
           v-on="$listeners"
           @input="onInput"
@@ -34,10 +36,12 @@
             :value="value"
             :type="input.type"
             :placeholder="placeholder"
-            class="px-4 py-4 text-base border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
+            class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
             :class="{
               'error-input': onError === 'empty' || onError === 'not-equal',
               'warning-input-pwd': onError === 'invalid',
+              'py-2.5 text-sm': size === 'md',
+              'py-4 text-base': size === 'lg',
             }"
             v-on="$listeners"
             @input="onInput"
@@ -48,10 +52,14 @@
       <template v-if="type === 'password'">
         <EyesIcon
           v-if="!input.visible"
-          class="eyes-icon"
+          :class="`eyes-icon-${size}`"
           @click="onChangeVisible"
         />
-        <EyesOffIcon v-else class="eyes-icon" @click="onChangeVisible" />
+        <EyesOffIcon
+          v-else
+          :class="`eyes-icon-${size}`"
+          @click="onChangeVisible"
+        />
       </template>
       <p v-if="onError === 'empty'" class="error-input-form">
         Este campo es requerido
@@ -131,6 +139,10 @@ export default {
       type: String,
       default: '',
     },
+    size: {
+      type: String,
+      default: 'md',
+    },
   },
   data() {
     return {
@@ -192,8 +204,12 @@ export default {
 </script>
 
 <style scoped lang="postcss">
-.eyes-icon {
+.eyes-icon-lg {
   @apply stroke-current text-gray-400 absolute right-3 top-4 cursor-pointer;
+}
+
+.eyes-icon-md {
+  @apply stroke-current text-gray-400 absolute right-2 top-2.5 cursor-pointer;
 }
 
 .is-error {

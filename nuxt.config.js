@@ -45,7 +45,11 @@ export default {
   css: ['@/assets/css/main.css', '@/assets/css/general.css'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ['@/plugins/repository.js'],
+  plugins: [
+    '@/plugins/axios.js',
+    '@/plugins/filters/user.js',
+    '@/plugins/repository.js',
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   // Auto import components: https://go.nuxtjs.dev/config-components

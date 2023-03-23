@@ -43,7 +43,7 @@
           :id="`modal-body-${id}`"
           :ref="`modal-body-${id}`"
           :style="stylesModalBody"
-          class="modal-body scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-200 scrollbar-track-gray-100"
+          class="modal-body overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-200 scrollbar-track-gray-100"
         >
           <slot></slot>
         </div>
@@ -63,6 +63,7 @@
 
 <script>
 export default {
+  name: 'Modal',
   components: {
     CloseIcon: () => import('@/static/icons/x.svg?inline'),
   },
@@ -85,11 +86,7 @@ export default {
       type: Boolean,
       required: false,
       default: true,
-    },
-    target: {
-      type: String,
-      required: true,
-    },
+    }
   },
   data() {
     return {

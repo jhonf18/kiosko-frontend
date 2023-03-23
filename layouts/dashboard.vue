@@ -132,6 +132,8 @@
       ></div>
       <Nuxt></Nuxt>
     </main>
+    <Alert></Alert>
+    <Toast></Toast>
   </div>
 </template>
 
@@ -184,10 +186,7 @@ export default {
       this.openDropdown = !this.openDropdown
     },
     catchOutsideClick(event, dropdown) {
-      // When user clicks menu — do nothing
       if (dropdown == event.target) return false
-
-      // When user clicks outside of the menu — close the menu
       if (this.openDropdown && dropdown != event.target) return true
     },
   },

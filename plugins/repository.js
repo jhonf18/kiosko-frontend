@@ -8,6 +8,8 @@ export default (ctx, inject) => {
     repositoryWithAxios.getBranchOfficeRepository()
   )
 
+  inject('userRepository', repositoryWithAxios.getUserRepository())
+
   // You can reuse the repositoryWithAxios object:
   // inject("userRepository", repositoryWithAxios('/users'));
 }

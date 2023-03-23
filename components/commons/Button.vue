@@ -11,6 +11,21 @@
 </template>
 
 <script scoped>
+const variants = [
+  'default',
+  'success',
+  'danger',
+  'primary',
+  'warning',
+  'outline',
+  'outline-danger',
+  'outline-success',
+  'outline-primary',
+  'outline-warning',
+]
+
+const sizes = ['sm', 'md', 'lg', 'block', 'lg-block']
+
 export default {
   props: {
     to: {
@@ -22,11 +37,13 @@ export default {
       type: String,
       required: false,
       default: 'default',
+      validator: (value) => variants.includes(value),
     },
     size: {
       type: String,
       required: false,
       default: 'md',
+      validator: (value) => sizes.includes(value),
     },
   },
   data() {

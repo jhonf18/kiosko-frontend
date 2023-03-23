@@ -55,20 +55,19 @@
               </span>
             </td>
             <td class="p-4 text-sm">
-              <span class="">{{ user.role }}</span>
+              <span class="">{{ user.role | roleName }}</span>
             </td>
             <td class="p-4 text-sm">
-              <span class="">{{ user.branch_office.name }}</span>
+              <span v-if="user.branch_office">{{
+                user.branch_office.name
+              }}</span>
+              <span v-else>No asignada</span>
             </td>
             <td class="p-4 text-sm">
               <div class="flex items-center justify-center md:justify-start">
                 <div
                   class="h-2.5 w-2.5 rounded-full bg-green-500 mr-2"
-                  v-if="user.active"
-                ></div>
-                <div
-                  class="h-2.5 w-2.5 rounded-full bg-red-500 mr-2"
-                  v-else
+                  :class="user.active ? 'bg-green-500' : 'bg-red-500'"
                 ></div>
                 <span class="hidden md:inline-block">
                   {{ user.active ? 'Activo' : 'Desactivo' }}
@@ -103,51 +102,14 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 import ModalAddUser from '~/components/blocks/Modals/ModalAddUser.vue'
-
-const users = [
-  {
-    name: 'James Bons',
-    nickname: 'jamesbob',
-    role: 'ROLE_WAITER',
-    branch_office: { name: 'El Zulia' },
-    active: true,
-  },
-  {
-    name: 'Bob',
-    nickname: 'bob',
-    role: 'ROLE_LEADER',
-    branch_office: { name: 'El Zulia' },
-    active: false,
-  },
-  {
-    name: 'Ana',
-    nickname: 'ana',
-    role: 'ROLE_OVEN_COOK',
-    branch_office: { name: 'El Zulia' },
-    active: true,
-  },
-  {
-    name: 'Peter',
-    nickname: 'peter12',
-    role: 'ROLE_KITCHEN_COOK',
-    branch_office: { name: 'El Zulia' },
-    active: true,
-  },
-  {
-    name: 'Cristian Mauricio Amaya Mendez',
-    nickname: 'cristinamaya',
-    role: 'ROLE_OVEN_COOK',
-    branch_office: { name: 'El Zulia' },
-    active: true,
-  },
-]
+import { userStoreNames } from '~/store/user'
 
 export default {
   layout: 'dashboard',
   data() {
     return {
-      users,
       filterOptions: [
         { name: 'Todos los usuarios', selected: true, value: 0 },
         { name: 'El Zulia', value: 1 },
@@ -155,21 +117,10 @@ export default {
       ],
     }
   },
-  mounted() {
-    const roles = [
-      { path: 'ROLE_ADMIN', name: 'Administrador' },
-      { path: 'ROLE_WAITER', name: 'Mesero' },
-      { path: 'ROLE_LEADER', name: 'Líder' },
-      { path: 'ROLE_KITCHEN_COOK', name: 'Cocinero de cocina' },
-      { path: 'ROLE_OVEN_COOK', name: 'Cocinero de horno' },
-    ]
-    this.users.forEach((user) => {
-      const indexRole = roles.findIndex((role) => role.path === user.role)
-
-      if (indexRole > -1) {
-        user.role = roles[indexRole].name
-      }
-    })
+  async created() {
+    if (!this.users) {
+      await this.loadUsers()
+    }
   },
   components: {
     EditIcon: () => import('@/static/icons/edit.svg?inline'),
@@ -181,6 +132,14 @@ export default {
     openModalAddUser() {
       this.$refs['modal-add-user'].open()
     },
+    ...mapActions({
+      loadUsers: userStoreNames.actions.load,
+    }),
+  },
+  computed: {
+    ...mapGetters({
+      users: userStoreNames.getters.get,
+    }),
   },
 }
 </script>
