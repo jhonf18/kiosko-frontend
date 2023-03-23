@@ -6,6 +6,7 @@ const localStoreNames = {
     set: 'set',
     add: 'add',
     update: 'update',
+    delete: 'delete',
   },
 }
 
@@ -16,6 +17,7 @@ export const branchOfficeStoreNames = {
     set: 'branchOffice/set',
     add: 'branchOffice/add',
     update: 'branchOffice/update',
+    delete: 'branchOffice/delete',
   },
 }
 
@@ -57,5 +59,14 @@ export const mutations = {
         ? branchOffice
         : branchOfficeStore
     )
+  },
+  delete(state, branchOffice) {
+    const indexBranchOffice = state._branchOffices.findIndex(
+      (b) => b.id === branchOffice.id
+    )
+
+    if (indexBranchOffice > -1) {
+      state._branchOffices.splice(indexBranchOffice, 1)
+    }
   },
 }

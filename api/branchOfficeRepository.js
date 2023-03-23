@@ -50,6 +50,17 @@ export const branchOfficeRepository = ($axios) => ({
   },
 
   delete(id) {
-    return $axios.$delete(`/back-office/admin/delete-branch-office/${id}`)
+    return new Promise(async (resolve, reject) => {
+      try {
+        const result = await $axios.$delete(
+          `/back-office/admin/delete-branch-office/${id}`
+        )
+        resolve(result.data)
+      } catch (err) {
+        if (err.response && err.response.data) {
+          reject(err.response.data.error)
+        }
+      }
+    })
   },
 })

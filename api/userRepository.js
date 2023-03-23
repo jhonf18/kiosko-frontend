@@ -34,7 +34,7 @@ export const userRepository = ($axios) => ({
       $axios
         .$post('/back-office/admin/verify-password', { password: password })
         .then((result) => {
-          resolve(result.data.message)
+          resolve(result.data)
         })
         .catch((err) => {
           if (err.response && err.response.data.error) {

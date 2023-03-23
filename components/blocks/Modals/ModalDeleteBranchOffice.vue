@@ -62,7 +62,7 @@
     </div>
     <div class="flex justify-end mt-8 mb-2">
       <ButtonWithSpinner
-        @click="$refs['modal-confirm-pwd-brach-office'].open()"
+        @click="openModalConfirmPassword"
         :loading="loading"
         :text="button.text"
         variant="danger"
@@ -80,14 +80,15 @@
     <ModalConfirmPassword
       id="branch-office"
       ref="modal-confirm-pwd-brach-office"
+      @correctPassword="deleteBranchOffice"
     ></ModalConfirmPassword>
   </Modal>
 </template>
 
 <script>
-import { isNotEmpty } from '@/assets/js/validations'
-import { formatErrorMessages } from '@/assets/utils/formatErrorMessage'
 import { mapMutations } from 'vuex'
+import { branchOfficeStoreNames } from '~/store/branchOffice'
+import { generalStoreNames } from '~/store/general'
 import { userStoreNames } from '~/store/user'
 import ModalConfirmPassword from './ModalConfirmPassword.vue'
 const nameRef = 'add-branch-office'
@@ -125,40 +126,58 @@ export default {
   methods: {
     ...mapMutations({
       updateUsers: userStoreNames.mutations.update,
+      showToast: generalStoreNames.mutations.showToast,
+      deleteBranchOfficeStore: branchOfficeStoreNames.mutations.delete,
     }),
     async deleteBranchOffice() {
       if (this.loading) return
-      const fields = ['name', 'address']
-      const validation = isNotEmpty(this.branchOffice, fields)
-      if (validation.error) {
-        this.toast.message = 'Debes ingresar el nombre y la dirección.'
-        return this.$refs[`toast-${this.nameRef}`].show()
-      }
+
+      this.isLoading(true)
+
       try {
-        const branchOffice = await this.$branchOfficeRepository.create({
-          name: this.branchOffice.name,
-          address: this.branchOffice.address,
-          employees: this.branchOffice.selectedEmployees,
-        })
-        this.addBranchOffice(branchOffice)
+        await this.$branchOfficeRepository.delete(this.branchOffice.id)
+
+        this.deleteBranchOfficeStore(this.branchOffice)
         this.updateUsers({
-          usersIDS: this.branchOffice.selectedEmployees,
-          branchOffice: { id: branchOffice.id, name: branchOffice.name },
+          usersIDS: [],
+          branchOffice: {
+            id: this.branchOffice.id,
+            name: this.branchOffice.name,
+          },
         })
-        this.$refs[`modal-${this.nameRef}-${this.id}`].closeByButton()
+
+        this.showToast({
+          text: 'Se ha eliminado la sucursal satisfactoriamente.',
+          type: 'success',
+          visibleTime: 2,
+        })
       } catch (err) {
-        const messages = err.message
-        this.toast.message = formatErrorMessages(messages)
-        return this.$refs[`toast-${this.nameRef}`].show()
+        this.showToast({
+          text: err.message,
+          type: 'error',
+          visibleTime: 3,
+        })
+        this.isLoading(false)
       }
+
+      setTimeout(() => {
+        this.close()
+      }, 2000)
+    },
+    openModalConfirmPassword() {
+      if (this.loading) return
+      this.$refs['modal-confirm-pwd-brach-office'].open()
     },
     isLoading(state) {
-      if (state) this.button.text = 'Creando ...'
-      else this.button.text = 'Crear sucursal'
+      if (state) this.button.text = 'Eliminando ...'
+      else this.button.text = 'Eliminar sucursal'
       this.loading = state
     },
     open() {
       this.$refs[`modal-${this.nameRef}-${this.id}`].open()
+    },
+    close() {
+      this.$refs[`modal-${this.nameRef}-${this.id}`].closeByButton()
     },
   },
   components: { ModalConfirmPassword },

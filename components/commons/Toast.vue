@@ -16,7 +16,7 @@
       <span class="mr-2 text-sm w-56 max-w-56" v-if="!toast.show">
         <slot></slot>
       </span>
-      <span v-else>
+      <span class="mr-2 text-sm w-56 max-w-56" v-else>
         <p>
           {{ toast.text }}
         </p>

@@ -49,7 +49,9 @@ export default {
     ...mapMutations({
       showToast: generalStoreNames.mutations.showToast,
     }),
-    verifyPassword() {
+    async verifyPassword() {
+      if (this.loading) return
+
       this.setLoading(true)
 
       if (this.password.length === 0) {
@@ -60,12 +62,38 @@ export default {
         })
         return this.setLoading(false)
       }
+
+      try {
+        const result = await this.$userRepository.verifyPassword(this.password)
+        if (result.status === 'SUCCESS') {
+          this.close()
+          this.$emit('correctPassword')
+        } else {
+          this.showToast({
+            text: result.message,
+            type: 'error',
+            visibleTime: 3,
+          })
+        }
+
+        this.setLoading(false)
+      } catch (err) {
+        this.showToast({
+          text: err.message,
+          type: 'error',
+          visibleTime: 3,
+        })
+        this.setLoading(false)
+      }
     },
     setLoading(state) {
       this.loading = state
     },
     open() {
       this.$refs[`modal-confirm-password-${this.id}`].open()
+    },
+    close() {
+      this.$refs[`modal-confirm-password-${this.id}`].closeByButton()
     },
   },
 }
