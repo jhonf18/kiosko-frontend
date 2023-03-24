@@ -1,76 +1,91 @@
 <template>
   <Modal
-    :id="`component-${id}`"
-    :ref="`component-${id}`"
-    target="modal-add-user"
+    :id="`modal-edit-${id}`"
+    :ref="`modal-edit-${id}`"
+    title="Editar usuario"
     size="lg"
     :footer="false"
   >
-    <div class="grid grid-cols-2 gap-4 mb-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
       <Input
-        label="Ingresa el nombre del empleado"
+        label="Nombre del empleado"
         v-model.trim="user.name"
-        idInput="add-user-name"
+        idInput="edit-user-name"
         validations="true"
         required="true"
         typeValidation="name"
         type="text"
         placeholder="Nombre"
         invalidMessage="El nombre ingresado no es válido."
-        class="mb-4"
+        size="md"
+      ></Input>
+      <SelectInput
+        label="Estado del ususario"
+        :options="[
+          { name: 'Activo', value: true },
+          { name: 'Inhabilitado', value: false },
+        ]"
+        v-model="user.active"
+        class="w-full"
+      ></SelectInput>
+      <SelectInput
+        label="Rol del empleado"
+        :options="roles"
+        v-model="user.role"
+        class="w-full"
+      ></SelectInput>
+      <SelectInput
+        label="Sucursal asignada"
+        :options="branchOffices"
+        v-model="user.branch_office"
+        class="w-full"
+      ></SelectInput>
+      <Input
+        label="Email del empleado"
+        v-model.trim="user.email"
+        id-input="edit-user-email"
+        :disabled="true"
+        type="email"
+        placeholder="example@kioksollanero.com"
         size="md"
       ></Input>
       <Input
-        label="Ingresa el email del empleado"
-        v-model.trim="user.email"
-        id-input="add-user-email"
-        type="email"
-        required="true"
-        validations="true"
-        typeValidation="email"
+        label="Nombre de usuario del empleado"
+        v-model.trim="user.nickname"
+        id-input="edit-user-nickname"
+        :disabled="true"
+        type="text"
+        typeValidation="name"
         placeholder="example@kioksollanero.com"
-        invalidMessage="Al parecer el correo no es válido."
-        class="mb-4"
         size="md"
       ></Input>
+      <div class="w-full border-t col-span-2">
+        <h5 class="font-medium mt-4">Cambiar contraseña</h5>
+      </div>
       <Input
         label="Contraseña "
         placeholder="Contraseña"
         v-model.trim="user.password_1"
-        idInput="add-user-password-1"
-        required="true"
+        :password="user.password_2"
+        idInput="edit-user-password-1"
         validations="true"
         type="password"
         typeValidation="password"
         invalidMessage="La contraseña es muy débil."
-        class="mb-4"
         size="md"
       ></Input>
       <Input
         label="Repetir contraseña"
         placeholder="Repetir contraseña"
         v-model.trim="user.password_2"
-        idInput="add-user-password-2"
-        required="true"
+        idInput="edit-user-password-2"
         validations="true"
+        :password="user.password_1"
         type="password"
         typeValidation="password"
         invalidMessage="La contraseña es muy débil."
-        class="mb-4"
         size="md"
       ></Input>
-      <SelectInput
-        label="Seleccionar el rol del empleado"
-        :options="roles"
-        v-model="user.role"
-        class="w-full"
-      ></SelectInput>
-      <SelectInput
-        label="Seleccionar sucursal"
-        :options="branchOffices"
-        v-model="user.branch_office"
-        class="w-full"
-      ></SelectInput>
     </div>
     <div class="flex justify-end mt-8 mb-2">
       <ButtonWithSpinner
@@ -84,18 +99,28 @@
 
 <script>
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import { isNotEmpty } from '~/assets/js/validations'
 import { formatErrorMessages } from '~/assets/utils/formatErrorMessage'
 import { branchOfficeStoreNames } from '~/store/branchOffice'
 import { generalStoreNames } from '~/store/general'
 import { userStoreNames } from '~/store/user'
 
 export default {
-  name: 'ModalAddUser',
+  name: 'ModalEditUSer',
   props: {
     id: {
       type: String,
       required: true,
+    },
+    userStore: {
+      type: Object,
+      default: () => ({
+        id: '',
+        active: true,
+        name: '',
+        email: '',
+        branchOffice: {},
+        role: '',
+      }),
     },
   },
   data() {
@@ -110,7 +135,7 @@ export default {
       },
       roles: [],
       branchOffices: [],
-      buttonText: 'Crear usuario',
+      buttonText: 'Actualizar usuario',
       loading: false,
     }
   },
@@ -131,6 +156,14 @@ export default {
     branchOfficesStore(newValue) {
       this.setBranchOffices(newValue)
     },
+    userStore(newValue) {
+      this.user = {
+        ...newValue,
+        branch_office: newValue.branch_office
+          ? newValue.branch_office.id
+          : null,
+      }
+    },
   },
   methods: {
     ...mapActions({
@@ -145,12 +178,10 @@ export default {
       if (this.loading) return
 
       this.setLoading(true)
-      const fields = ['name', 'email', 'password_1', 'password_2']
-      const validation = isNotEmpty(this.user, fields)
 
-      if (validation.error) {
+      if (!this.user.name || this.name.length === 0) {
         this.showToast({
-          text: 'Es necesario introducir el nombre, email y las contraseñas.',
+          text: 'Es necesario el nombre del usuario.',
           type: 'error',
         })
         this.setLoading(false)
@@ -169,14 +200,41 @@ export default {
         return
       }
 
+      let password = null
+      if (
+        this.user.password_1 &&
+        this.user.password_1.length > 0 &&
+        this.user.password_2 &&
+        this.user.password_2 > 0
+      ) {
+        if (this.user.password_1 !== this.user.password_2) {
+          this.showToast({
+            text: 'Las contraseñas son distintas.',
+            type: 'error',
+          })
+          this.setLoading(false)
+          return
+        }
+
+        password = this.user.password_1
+      }
+
       try {
-        const user = await this.$userRepository.create(this.user)
+        const user = await this.$userRepository.update(this.user.id, {
+          name: this.user.name,
+          active: this.user.active,
+          branch_office: this.user.branch_office,
+          role: this.user.role,
+          password,
+        })
+
+        // TODO: update state
 
         this.addEmployee({ ...user, branchOfficeID: user.branch_office.id })
         this.addUser(user)
 
         this.showToast({
-          text: 'Se ha creado el usuario satisfactoriamente.',
+          text: 'Se ha actualizado el usuario satisfactoriamente.',
           type: 'success',
           visibleTime: 2,
         })
@@ -195,8 +253,8 @@ export default {
       }, 2000)
     },
     setLoading(state) {
-      if (state) this.buttonText = 'Creando ...'
-      else this.buttonText = 'Crear usuario'
+      if (state) this.buttonText = 'Editando ...'
+      else this.buttonText = 'Editar usuario'
 
       this.loading = state
     },
@@ -219,11 +277,11 @@ export default {
       this.roles = [{ name: 'Roles', value: null, selected: true }, ...roles]
     },
     async open() {
-      this.$refs[`component-${this.id}`].open()
+      this.$refs[`modal-edit-${this.id}`].open()
       await this.loadBranchOffices()
     },
     close() {
-      this.$refs[`component-${this.id}`].closeByButton()
+      this.$refs[`modal-edit-${this.id}`].closeByButton()
     },
   },
 }

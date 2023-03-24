@@ -12,6 +12,7 @@
         <input
           :id="idInput"
           :value="value"
+          :disabled="disabled"
           :type="input.type"
           :placeholder="placeholder"
           class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
@@ -34,6 +35,7 @@
           <input
             :id="idInput"
             :value="value"
+            :disabled="disabled"
             :type="input.type"
             :placeholder="placeholder"
             class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
@@ -44,7 +46,7 @@
               'py-4 text-base': size === 'lg',
             }"
             v-on="$listeners"
-            @input="onInput"
+            @input.trim="onInput"
             @blur="onBlur"
           />
         </label>
@@ -64,7 +66,7 @@
       <p v-if="onError === 'empty'" class="error-input-form">
         Este campo es requerido
       </p>
-      <p v-else-if="onError === 'invalid'" class="error-input-form">
+      <p v-else-if="onError === 'invalid'" class="error-input-form-warning">
         {{ invalidMessage }}
       </p>
       <p v-else-if="onError === 'not-equal'" class="error-input-form">
@@ -143,6 +145,11 @@ export default {
       type: String,
       default: 'md',
     },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -218,6 +225,10 @@ export default {
 
 .error-input-form {
   @apply text-xs text-red-600 ml-1;
+}
+
+.error-input-form-warning {
+  @apply text-xs text-yellow-500 ml-1;
 }
 
 .error-input {

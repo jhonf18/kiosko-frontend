@@ -2,18 +2,21 @@
   <div>
     <label
       v-if="label"
-      for="select-input"
-      class="block mb-2 text-sm font-medium text-gray-900"
+      :for="id"
+      class="font-medium text-sm mb-1 text-gray-600"
       >{{ label }}</label
     >
     <select
-      id="select-input"
-      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      :id="id"
+      @change="onChange"
+      v-model="content"
+      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none focus:outline-gray-400"
     >
       <option
         v-for="option in options"
         :value="option.value"
-        :selected="option.selected"
+        :disabled="!option.value && typeof option.value !== 'boolean'"
+        :selected="typeof option.value === 'undefined' || !option.value"
       >
         {{ option.name }}
       </option>
@@ -23,7 +26,15 @@
 
 <script>
 export default {
+  model: {
+    prop: 'value',
+    event: 'update',
+  },
   props: {
+    value: {
+      type: [String, Number, Boolean],
+      default: null,
+    },
     label: {
       type: String,
       required: false,
@@ -32,6 +43,17 @@ export default {
     options: {
       type: Array,
       required: true,
+    },
+  },
+  data() {
+    return {
+      id: `${new Date().getTime() - Math.random()}`,
+      content: this.value,
+    }
+  },
+  methods: {
+    onChange() {
+      this.$emit('update', this.content)
     },
   },
 }

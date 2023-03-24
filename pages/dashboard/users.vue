@@ -2,8 +2,7 @@
   <div class="overflow-hidden">
     <div class="px-4 my-4 max-w-full">
       <h2 class="font-semibold text-xl mb-4">Todos los usuarios</h2>
-      <div class="flex justify-between w-full">
-        <SelectInput :options="filterOptions" class="w-48"></SelectInput>
+      <div class="flex justify-end w-full">
         <Button size="sm" variant="primary" @click="openModalAddUser">
           <span class="flex items-center w-full">
             <PlusIcon></PlusIcon>
@@ -70,13 +69,18 @@
                   :class="user.active ? 'bg-green-500' : 'bg-red-500'"
                 ></div>
                 <span class="hidden md:inline-block">
-                  {{ user.active ? 'Activo' : 'Desactivo' }}
+                  {{ user.active ? 'Activo' : 'Inhabilitado' }}
                 </span>
               </div>
             </td>
             <td class="p-4">
               <div class="flex items-center">
-                <Button size="sm" variant="primary" class="mr-3">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  class="mr-3"
+                  @click="openModalEditUser(user)"
+                >
                   <span class="flex w-full items-center">
                     <EditIcon class="w-4 h-4 lg:w-5 lg:h-5"></EditIcon>
                     <span class="hidden lg:block">
@@ -98,28 +102,30 @@
       </table>
     </div>
     <ModalAddUser id="modal-add-user" ref="modal-add-user"></ModalAddUser>
+    <ModalEditUser
+      id="modal-edit-user"
+      ref="modal-edit-user"
+      :userStore="userStore"
+    ></ModalEditUser>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import ModalAddUser from '~/components/blocks/Modals/ModalAddUser.vue'
+import ModalEditUser from '~/components/blocks/Modals/ModalEditUser.vue'
 import { userStoreNames } from '~/store/user'
 
 export default {
   layout: 'dashboard',
-  data() {
-    return {
-      filterOptions: [
-        { name: 'Todos los usuarios', selected: true, value: 0 },
-        { name: 'El Zulia', value: 1 },
-        { name: 'Los Patios', value: 2 },
-      ],
-    }
-  },
   async created() {
     if (!this.users) {
       await this.loadUsers()
+    }
+  },
+  data() {
+    return {
+      userStore: {},
     }
   },
   components: {
@@ -127,6 +133,7 @@ export default {
     TrashIcon: () => import('@/static/icons/trash.svg?inline'),
     PlusIcon: () => import('@/static/icons/plus.svg?inline'),
     ModalAddUser,
+    ModalEditUser,
   },
   methods: {
     openModalAddUser() {
@@ -135,6 +142,10 @@ export default {
     ...mapActions({
       loadUsers: userStoreNames.actions.load,
     }),
+    openModalEditUser(user) {
+      this.userStore = user
+      this.$refs['modal-edit-user'].open()
+    },
   },
   computed: {
     ...mapGetters({

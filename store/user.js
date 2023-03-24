@@ -1,27 +1,35 @@
+import { generalStoreNames } from './general'
+
 const localStoreNames = {
-  actions: { load: 'load' },
+  actions: { load: 'load', loadRoles: 'loadRoles' },
   mutations: {
     set: 'set',
     update: 'updatePropertyBranchOffice',
+    setRoles: 'setRoles',
   },
 }
 
 export const userStoreNames = {
-  getters: { get: 'user/getUsers' },
-  actions: { load: 'user/load' },
+  getters: { get: 'user/getUsers', getRoles: 'user/getRoles' },
+  actions: { load: 'user/load', loadRoles: 'user/loadRoles' },
   mutations: {
     set: 'user/set',
     update: 'user/updatePropertyBranchOffice',
+    add: 'user/add',
   },
 }
 
 export const state = () => ({
   _users: null,
+  _roles: [],
 })
 
 export const getters = {
   getUsers(state) {
     return state._users
+  },
+  getRoles(state) {
+    return state._roles
   },
 }
 
@@ -35,7 +43,39 @@ export const actions = {
         commit(localStoreNames.mutations.set, users)
       }
     } catch (err) {
-      commit('general/showError', { name: err.code, reason: err.message })
+      commit(
+        generalStoreNames.mutations.showError,
+        {
+          name: err.code,
+          reason: err.message,
+        },
+        { root: true }
+      )
+    }
+  },
+  async loadRoles({ commit }) {
+    try {
+      const rolesInLocalStorage = localStorage.getItem('roles')
+
+      if (!rolesInLocalStorage) {
+        let roles = await this.$userRepository.getRoles()
+        localStorage.setItem('roles', JSON.stringify(roles))
+        commit(localStoreNames.mutations.setRoles, roles)
+      } else {
+        commit(
+          localStoreNames.mutations.setRoles,
+          JSON.parse(rolesInLocalStorage)
+        )
+      }
+    } catch (err) {
+      commit(
+        generalStoreNames.mutations.showError,
+        {
+          name: err.code,
+          reason: err.message,
+        },
+        { root: true }
+      )
     }
   },
 }
@@ -57,5 +97,11 @@ export const mutations = {
 
       return user
     })
+  },
+  setRoles(state, roles) {
+    state._roles = roles
+  },
+  add(state, user) {
+    state._users.push(user)
   },
 }

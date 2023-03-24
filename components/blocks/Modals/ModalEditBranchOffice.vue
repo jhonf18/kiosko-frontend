@@ -9,14 +9,14 @@
     <h5 class="mb-2 font-medium">Datos básicos</h5>
     <div class="grid lg:grid-cols-2 gap-4 mb-4">
       <Input
-        v-model="branchOffice.name"
+        v-model.trim="branchOffice.name"
         id-input="input-branch-office-name"
         type="text"
         placeholder="Sucursal ...."
         label="Nombre"
       ></Input>
       <Input
-        v-model="branchOffice.address"
+        v-model.trim="branchOffice.address"
         id-input="input-branch-office-address"
         type="text"
         placeholder="El Zulia ...."

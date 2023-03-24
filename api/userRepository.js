@@ -19,11 +19,34 @@ export const userRepository = ($axios) => ({
   // },
 
   create(payload) {
-    return $axios.$post(`/auth/signup`, payload)
+    return new Promise(async (resolve, reject) => {
+      $axios
+        .$post(`/auth/signup`, payload)
+        .then((result) => {
+          resolve(result.data)
+        })
+        .catch((err) => {
+          if (err.response && err.response.data.error) {
+            reject(err.response.data.error)
+          }
+        })
+    })
   },
 
   update(id, payload) {
-    return $axios.$post(`/back-office/admin/update-branch-user/${id}`, payload)
+    return new Promise(async (resolve, reject) => {
+      try {
+        const result = await $axios.$put(
+          `/back-office/admin/update-branch-user/${id}`,
+          payload
+        )
+        resolve(result.data)
+      } catch (err) {
+        if (err.response && err.response.data) {
+          reject(err.response.data.error)
+        }
+      }
+    })
   },
 
   delete(id) {
@@ -35,6 +58,20 @@ export const userRepository = ($axios) => ({
         .$post('/back-office/admin/verify-password', { password: password })
         .then((result) => {
           resolve(result.data)
+        })
+        .catch((err) => {
+          if (err.response && err.response.data.error) {
+            reject(err.response.data.error)
+          }
+        })
+    })
+  },
+  getRoles() {
+    return new Promise((resolve, reject) => {
+      $axios
+        .get(`/back-office/admin/roles`)
+        .then((result) => {
+          resolve(result.data.data)
         })
         .catch((err) => {
           if (err.response && err.response.data.error) {

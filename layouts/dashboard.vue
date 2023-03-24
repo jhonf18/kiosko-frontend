@@ -31,7 +31,6 @@
                 class="w-9 h-9 rounded-full flex-none bg-primary-dark flex items-center justify-center font-semibold text-white text-center"
               >
                 JP
-                <!-- <span class="cursor-pointer text-white font-semibold">JP</span> -->
               </span>
             </button>
             <div
@@ -123,11 +122,12 @@
 
     <main class="pt-18 md:ml-64">
       <div
-        class="absolute top-0 left-0 w-full h-full lg:hidden"
+        class="absolute top-0 left-0 w-full h-full lg:hidden z-10"
         :class="{
           'aside-menu-visible bg-aside-menu min-h-screen': showLateralMenu,
           'aside-menu-invisible': !showLateralMenu,
         }"
+        v-if="showLateralMenu"
         @click="showLateralMenu = false"
       ></div>
       <Nuxt></Nuxt>
@@ -138,6 +138,9 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import { userStoreNames } from '~/store/user'
+
 const navigation = [
   {
     name: 'Sucursales',
@@ -174,7 +177,13 @@ export default {
     MenuIcon: () => import('@/static/icons/menu.svg?inline'),
     SettingsIcon: () => import('@/static/icons/settings.svg?inline'),
   },
+  async mounted() {
+    await this.loadRoles()
+  },
   methods: {
+    ...mapActions({
+      loadRoles: userStoreNames.actions.loadRoles,
+    }),
     toggleDropdown() {
       const closeListerner = (e) => {
         if (this.catchOutsideClick(e, this.$refs['dropdown-button-profile']))

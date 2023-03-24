@@ -18,6 +18,7 @@ export const branchOfficeStoreNames = {
     add: 'branchOffice/add',
     update: 'branchOffice/update',
     delete: 'branchOffice/delete',
+    addEmployee: 'branchOffice/addEmployee',
   },
 }
 
@@ -32,13 +33,15 @@ export const getters = {
 }
 
 export const actions = {
-  async load({ commit }) {
+  async load({ commit, getters }) {
     try {
       if (this.$auth.loggedIn && this.$auth.user.role === 'ROLE_ADMIN') {
-        const branchOffices = await this.$branchOfficeRepository.index(
-          'address,name,id,employees.name,employees.role,employees.nickname,employees.id'
-        )
-        commit(localStoreNames.mutations.set, branchOffices)
+        if (!getters.getBranchOffices) {
+          const branchOffices = await this.$branchOfficeRepository.index(
+            'address,name,id,employees.name,employees.role,employees.nickname,employees.id'
+          )
+          commit(localStoreNames.mutations.set, branchOffices)
+        }
       }
     } catch (err) {
       commit('general/showError', { name: err.code, reason: err.message })
@@ -59,6 +62,21 @@ export const mutations = {
         ? branchOffice
         : branchOfficeStore
     )
+  },
+  addEmployee(state, { id, name, nickname, role, branchOfficeID }) {
+    let indexBranchOffice = -1
+    let branchOffice = state._branchOffices.find((b, index) => {
+      if (b.id === branchOfficeID) {
+        indexBranchOffice = index
+        return true
+      }
+      return false
+    })
+
+    if (indexBranchOffice !== -1) {
+      branchOffice.employees.push({ id, name, nickname, role })
+      state._branchOffices[indexBranchOffice] = branchOffice
+    }
   },
   delete(state, branchOffice) {
     const indexBranchOffice = state._branchOffices.findIndex(

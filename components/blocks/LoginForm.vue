@@ -32,7 +32,7 @@
         <h3 class="text-primary-light font-bold text-2xl">Iniciar sesión</h3>
         <form class="w-full mt-6">
           <Input
-            v-model="nickname"
+            v-model.trim="nickname"
             id-input="login-nickname"
             type="email"
             placeholder="Ingresa tu nombre de usuario"
@@ -40,7 +40,7 @@
             size="lg"
           />
           <Input
-            v-model="password"
+            v-model.trim="password"
             id-input="login-password"
             type="password"
             placeholder="Ingresa tu contraseña"
