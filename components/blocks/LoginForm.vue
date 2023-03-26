@@ -30,23 +30,43 @@
       </div>
       <div class="w-full" v-if="step === 1">
         <h3 class="text-primary-light font-bold text-2xl">Iniciar sesión</h3>
-        <form class="w-full mt-6">
+        <form class="w-full mt-6" @submit.prevent="signinUser">
           <Input
+            v-if="!nicknameIsSaved"
             v-model.trim="nickname"
             id-input="login-nickname"
-            type="email"
+            type="text"
+            required="true"
             placeholder="Ingresa tu nombre de usuario"
             class="mb-4"
             size="lg"
           />
+          <Message
+            v-if="nicknameIsSaved"
+            header="Inicio automático"
+            class="mb-4"
+          >
+            Vas a ingresar con el nombre de usuario
+            <span class="font-bold">{{ nickname }}</span
+            >. <br />
+            <span class="mt-2"
+              >Si quieres ingresar con otro nombre de usuario dale click
+              <span
+                @click="loginWithOtherNickname"
+                class="text-blue-600 hover:underline cursor-pointer"
+                >aquí</span
+              >.</span
+            >
+          </Message>
           <Input
             v-model.trim="password"
             id-input="login-password"
             type="password"
+            required="true"
             placeholder="Ingresa tu contraseña"
             size="lg"
           />
-          <div class="mt-5 flex items-center">
+          <div class="mt-5 flex items-center" v-if="!nicknameIsSaved">
             <input
               class="w-5 h-5 text-primary-light rounded form-checkbox focus:ring-primary-light cursor-pointer"
               type="checkbox"
@@ -59,6 +79,7 @@
             </label>
           </div>
           <Button
+            type="submit"
             variant="primary"
             size="lg-block"
             class="px-6 mt-8"
@@ -66,6 +87,7 @@
           >
             Iniciar sesión
           </Button>
+          <input type="submit" value="Submit" class="hidden" />
         </form>
       </div>
     </Transition>
@@ -84,6 +106,14 @@ export default {
       nickname: '',
       password: '',
       rememberUser: false,
+      nicknameIsSaved: false,
+    }
+  },
+  mounted() {
+    const nickname = localStorage.getItem('dataUserLogin')
+    if (nickname) {
+      this.nicknameIsSaved = true
+      this.nickname = nickname
     }
   },
   methods: {
@@ -92,12 +122,22 @@ export default {
         await this.$auth.loginWith('local', {
           data: { nickname: this.nickname, password: this.password },
         })
+
+        if (this.rememberUser) {
+          // saving nickname in localstorage
+          localStorage.setItem('dataUserLogin', this.nickname)
+        }
       } catch (err) {
         console.log(
           '🚀 ~ file: index.vue:25 ~ signinUser ~ err:',
           err.response.data.error
         )
       }
+    },
+    loginWithOtherNickname() {
+      this.nicknameIsSaved = false
+      this.nickname = ''
+      localStorage.removeItem('dataUserLogin')
     },
   },
 }
