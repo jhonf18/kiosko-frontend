@@ -24,59 +24,68 @@
       ></Input>
     </div>
     <div>
-      <h5 class="font-medium mt-4">Empleados actuales en la sucursal</h5>
-      <div class="relative overflow-x-auto w-full max-w-full">
-        <table class="w-full">
-          <thead>
-            <tr class="border-b border-t bg-gray-100">
-              <th scope="col" class="text-center text-sm p-3 w-5">
-                <input
-                  class="w-4 h-4 text-primary-light rounded form-checkbox focus:ring-primary-light cursor-pointer"
-                  type="checkbox"
-                  value=""
-                />
-              </th>
-              <th
-                scope="col"
-                class="text-left text-gray-700 font-medium uppercase text-sm p-3 w-6/12 min-w-[250px]"
+      <template
+        v-if="branchOffice.employees && branchOffice.employees.length > 0"
+      >
+        <h5 class="font-medium mt-4">Empleados actuales en la sucursal</h5>
+        <div class="relative overflow-x-auto w-full max-w-full">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-t bg-gray-100">
+                <th scope="col" class="text-center text-sm p-3 w-5">
+                  <input
+                    class="w-4 h-4 text-primary-light rounded form-checkbox focus:ring-primary-light cursor-pointer"
+                    type="checkbox"
+                    value=""
+                  />
+                </th>
+                <th
+                  scope="col"
+                  class="text-left text-gray-700 font-medium uppercase text-sm p-3 w-6/12 min-w-[250px]"
+                >
+                  Nombre
+                </th>
+                <th
+                  class="text-left text-gray-700 font-medium uppercase text-sm w-28 p-3"
+                >
+                  Posición
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="employee in branchOffice.employees"
+                class="border-b bg-white hover:bg-gray-100"
               >
-                Nombre
-              </th>
-              <th
-                class="text-left text-gray-700 font-medium uppercase text-sm w-28 p-3"
-              >
-                Posición
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="employee in branchOffice.employees"
-              class="border-b bg-white hover:bg-gray-100"
-            >
-              <th scope="col" class="text-center text-sm p-3">
-                <input
-                  class="w-4 h-4 text-primary-light rounded form-checkbox focus:ring-primary-light cursor-pointer"
-                  type="checkbox"
-                  :value="employee.id"
-                  v-model="branchOffice.selectedEmployees"
-                />
-              </th>
-              <td class="flex flex-col p-3">
-                <span class="font-semibold text-sm md:text-base">
-                  {{ employee.name }}
-                </span>
-                <span class="text-gray-700 text-xs md:text-sm">
-                  {{ employee.nickname }}
-                </span>
-              </td>
-              <td class="p-3 text-sm">
-                <span class="">{{ employee.role | roleName }}</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <th scope="col" class="text-center text-sm p-3">
+                  <input
+                    class="w-4 h-4 text-primary-light rounded form-checkbox focus:ring-primary-light cursor-pointer"
+                    type="checkbox"
+                    :value="employee.id"
+                    v-model="branchOffice.selectedEmployees"
+                  />
+                </th>
+                <td class="flex flex-col p-3">
+                  <span class="font-semibold text-sm md:text-base">
+                    {{ employee.name }}
+                  </span>
+                  <span class="text-gray-700 text-xs md:text-sm">
+                    {{ employee.nickname }}
+                  </span>
+                </td>
+                <td class="p-3 text-sm">
+                  <span class="">{{ employee.role | roleName }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
+      <template v-else>
+        <h5 class="font-medium mb-2 text-center mt-6">
+          No hay empleados en esta sucursal
+        </h5>
+      </template>
     </div>
     <div>
       <h5 class="font-medium mb-2 mt-4">Agregar empleados</h5>
