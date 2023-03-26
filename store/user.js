@@ -14,8 +14,9 @@ export const userStoreNames = {
   actions: { load: 'user/load', loadRoles: 'user/loadRoles' },
   mutations: {
     set: 'user/set',
-    update: 'user/updatePropertyBranchOffice',
+    updatePropertyBranchOffice: 'user/updatePropertyBranchOffice',
     add: 'user/add',
+    update: 'user/update',
   },
 }
 
@@ -103,5 +104,11 @@ export const mutations = {
   },
   add(state, user) {
     state._users.push(user)
+  },
+  update(state, user) {
+    const userIndex = state._users.findIndex((u) => u.id === user.id)
+
+    state._users[userIndex] = user
+    state._users = [...state._users]
   },
 }

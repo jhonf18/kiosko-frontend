@@ -9,14 +9,14 @@
     <h5 class="mb-2 font-medium">Datos básicos</h5>
     <div class="grid lg:grid-cols-2 gap-4 mb-4">
       <Input
-        v-model.trim="branchOffice.name"
+        v-model="branchOffice.name"
         id-input="input-branch-office-name"
         type="text"
         placeholder="Sucursal ...."
         label="Nombre"
       ></Input>
       <Input
-        v-model.trim="branchOffice.address"
+        v-model="branchOffice.address"
         id-input="input-branch-office-address"
         type="text"
         placeholder="El Zulia ...."
@@ -218,7 +218,7 @@ export default {
     ...mapMutations({
       addBranchOffice: branchOfficeStoreNames.mutations.add,
       updateBranchOffice: branchOfficeStoreNames.mutations.update,
-      updateUsers: userStoreNames.mutations.update,
+      updateUsers: userStoreNames.mutations.updatePropertyBranchOffice,
     }),
     async editBranchOffice() {
       if (this.loading) return
@@ -256,7 +256,14 @@ export default {
         return this.$refs[`toast-${this.nameRef}`].show()
       }
     },
-    open() {
+    async open() {
+      if (!this.usersStore) {
+        await this.loadUsers()
+      }
+      this.users = this.usersStore.filter((user) => {
+        return user.role !== 'ROLE_ADMIN' && !user.branch_office
+      })
+
       this.$refs[`modal-${this.nameRef}-${this.id}`].open()
     },
     isLoading(state) {
@@ -269,6 +276,12 @@ export default {
     branchOfficeStore: {
       handler() {
         this.branchOffice = { ...this.branchOfficeStore }
+        const employees = this.usersStore.filter((user) => {
+          if (user.branch_office) {
+            return user.branch_office.id === this.branchOfficeStore.id
+          } else return false
+        })
+        this.branchOffice.employees = employees
         this.branchOffice.selectedEmployees = []
         this.branchOffice.selectedEmployees =
           this.branchOfficeStore.employees.map((e) => e.id)

@@ -9,7 +9,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
       <Input
         label="Nombre del empleado"
-        v-model.trim="user.name"
+        v-model="user.name"
         idInput="edit-user-name"
         validations="true"
         required="true"
@@ -89,7 +89,7 @@
     </div>
     <div class="flex justify-end mt-8 mb-2">
       <ButtonWithSpinner
-        @click="createUser"
+        @click="editUser"
         :loading="loading"
         :text="buttonText"
       ></ButtonWithSpinner>
@@ -118,7 +118,7 @@ export default {
         active: true,
         name: '',
         email: '',
-        branchOffice: {},
+        branchOffice: { id: '' },
         role: '',
       }),
     },
@@ -132,6 +132,7 @@ export default {
         password_2: '',
         role: null,
         branch_office: null,
+        branch_office_id: -1,
       },
       roles: [],
       branchOffices: [],
@@ -163,6 +164,9 @@ export default {
           ? newValue.branch_office.id
           : null,
       }
+      this.user.branch_office_id = newValue.branch_office
+        ? JSON.parse(JSON.stringify(newValue.branch_office.id))
+        : null
     },
   },
   methods: {
@@ -171,15 +175,15 @@ export default {
     }),
     ...mapMutations({
       showToast: generalStoreNames.mutations.showToast,
-      addEmployee: branchOfficeStoreNames.mutations.addEmployee,
-      addUser: userStoreNames.mutations.add,
+      updateUser: userStoreNames.mutations.update,
+      updateEmployee: branchOfficeStoreNames.mutations.updateEmployee,
     }),
-    async createUser() {
+    async editUser() {
       if (this.loading) return
 
       this.setLoading(true)
 
-      if (!this.user.name || this.name.length === 0) {
+      if (!this.user.name || this.user.name.length === 0) {
         this.showToast({
           text: 'Es necesario el nombre del usuario.',
           type: 'error',
@@ -228,10 +232,14 @@ export default {
           password,
         })
 
-        // TODO: update state
+        console.log(this.user.branch_office_id)
 
-        this.addEmployee({ ...user, branchOfficeID: user.branch_office.id })
-        this.addUser(user)
+        this.updateUser(user)
+        this.updateEmployee({
+          user,
+          branchOfficeID: user.branch_office.id,
+          oldBranchOfficeID: this.user.branch_office_id,
+        })
 
         this.showToast({
           text: 'Se ha actualizado el usuario satisfactoriamente.',
@@ -244,7 +252,7 @@ export default {
           type: 'error',
           visibleTime: 3,
         })
-        this.setLoading(false)
+        return this.setLoading(false)
       }
 
       setTimeout(() => {
@@ -253,9 +261,7 @@ export default {
       }, 2000)
     },
     setLoading(state) {
-      if (state) this.buttonText = 'Editando ...'
-      else this.buttonText = 'Editar usuario'
-
+      this.buttonText = state ? 'Editando ...' : 'Editar usuario'
       this.loading = state
     },
     setBranchOffices(branchOffices) {

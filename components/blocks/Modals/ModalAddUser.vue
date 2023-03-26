@@ -9,7 +9,7 @@
     <div class="grid grid-cols-2 gap-4 mb-4">
       <Input
         label="Ingresa el nombre del empleado"
-        v-model.trim="user.name"
+        v-model="user.name"
         idInput="add-user-name"
         validations="true"
         required="true"

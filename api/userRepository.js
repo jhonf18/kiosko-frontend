@@ -7,9 +7,11 @@ export const userRepository = ($axios) => ({
           resolve(result.data.data)
         })
         .catch((err) => {
-          if (err.response && err.response.data.error) {
-            reject(err.response.data.error)
-          }
+          reject(
+            err.response.data.error
+              ? err.response.data.error
+              : { message: 'Ha ocurrido un error inesperado.' }
+          )
         })
     })
   },
@@ -26,9 +28,11 @@ export const userRepository = ($axios) => ({
           resolve(result.data)
         })
         .catch((err) => {
-          if (err.response && err.response.data.error) {
-            reject(err.response.data.error)
-          }
+          reject(
+            err.response.data.error
+              ? err.response.data.error
+              : { message: 'Ha ocurrido un error inesperado.' }
+          )
         })
     })
   },
@@ -37,14 +41,16 @@ export const userRepository = ($axios) => ({
     return new Promise(async (resolve, reject) => {
       try {
         const result = await $axios.$put(
-          `/back-office/admin/update-branch-user/${id}`,
+          `/back-office/admin/update-user/${id}`,
           payload
         )
         resolve(result.data)
       } catch (err) {
-        if (err.response && err.response.data) {
-          reject(err.response.data.error)
-        }
+        reject(
+          err.response.data.error
+            ? err.response.data.error
+            : { message: 'Ha ocurrido un error inesperado.' }
+        )
       }
     })
   },
@@ -60,9 +66,11 @@ export const userRepository = ($axios) => ({
           resolve(result.data)
         })
         .catch((err) => {
-          if (err.response && err.response.data.error) {
-            reject(err.response.data.error)
-          }
+          reject(
+            err.response.data.error
+              ? err.response.data.error
+              : { message: 'Ha ocurrido un error inesperado.' }
+          )
         })
     })
   },
@@ -74,9 +82,11 @@ export const userRepository = ($axios) => ({
           resolve(result.data.data)
         })
         .catch((err) => {
-          if (err.response && err.response.data.error) {
-            reject(err.response.data.error)
-          }
+          reject(
+            err.response.data.error
+              ? err.response.data.error
+              : { message: 'Ha ocurrido un error inesperado.' }
+          )
         })
     })
   },

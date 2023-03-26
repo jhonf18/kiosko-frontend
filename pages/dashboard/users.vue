@@ -142,9 +142,9 @@ export default {
     ...mapActions({
       loadUsers: userStoreNames.actions.load,
     }),
-    openModalEditUser(user) {
+    async openModalEditUser(user) {
       this.userStore = user
-      this.$refs['modal-edit-user'].open()
+      await this.$refs['modal-edit-user'].open()
     },
   },
   computed: {

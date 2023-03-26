@@ -19,6 +19,7 @@ export const branchOfficeStoreNames = {
     update: 'branchOffice/update',
     delete: 'branchOffice/delete',
     addEmployee: 'branchOffice/addEmployee',
+    updateEmployee: 'branchOffice/updateEmployee',
   },
 }
 
@@ -86,5 +87,45 @@ export const mutations = {
     if (indexBranchOffice > -1) {
       state._branchOffices.splice(indexBranchOffice, 1)
     }
+  },
+  updateEmployee(state, { user, branchOfficeID, oldBranchOfficeID }) {
+    // Delete user of the old branchOffice
+    console.log(oldBranchOfficeID, branchOfficeID)
+    if (oldBranchOfficeID && branchOfficeID !== oldBranchOfficeID) {
+      let branchOfficeIndex = -1
+      let branchOffice = state._branchOffices.find((b, index) => {
+        if (b.id === oldBranchOfficeID) {
+          branchOfficeIndex = index
+          return true
+        }
+        return false
+      })
+
+      console.log(branchOffice)
+
+      const userIndex = branchOffice.employees.findIndex(
+        (u) => u.id === user.id
+      )
+
+      branchOffice.employees.splice(userIndex, 1)
+
+      state._branchOffices[branchOfficeIndex] = branchOffice
+    }
+
+    let branchOfficeIndex = -1
+    let branchOffice = state._branchOffices.find((b, index) => {
+      if (b.id === branchOfficeID) {
+        branchOfficeIndex = index
+        return true
+      }
+      return false
+    })
+    const userIndex = branchOffice.employees.findIndex((e) => e.id === user.id)
+    if (userIndex > -1) {
+      branchOffice.employees[userIndex] = user
+    } else {
+      branchOffice.employees.push(user)
+    }
+    state._branchOffices[branchOfficeIndex] = branchOffice
   },
 }
