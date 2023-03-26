@@ -63,6 +63,7 @@
                 </li>
                 <li>
                   <span
+                    @click="$auth.logout()"
                     class="cursor-pointer px-4 py-2 text-sm flex items-center text-gray-700 hover:bg-gray-100"
                     role="menuitem"
                   >
@@ -110,7 +111,11 @@
           </li>
         </ul>
         <div class="fixed bottom-1 w-full px-3 mt-8">
-          <Button variant="outline-primary" size="block">
+          <Button
+            variant="outline-primary"
+            size="block"
+            @click="$auth.logout()"
+          >
             <span class="flex justify-center items-center">
               Cerrar sesión
               <SignoutIcon></SignoutIcon>
