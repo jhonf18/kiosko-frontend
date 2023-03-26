@@ -56,7 +56,20 @@ export const userRepository = ($axios) => ({
   },
 
   delete(id) {
-    return $axios.$delete(`/back-office/admin/delete-user/${id}`)
+    return new Promise(async (resolve, reject) => {
+      $axios
+        .$delete(`/back-office/admin/delete-user/${id}`)
+        .then((result) => {
+          resolve(result.data)
+        })
+        .catch((err) => {
+          reject(
+            err.response.data.error
+              ? err.response.data.error
+              : { message: 'Ha ocurrido un error inesperado.' }
+          )
+        })
+    })
   },
   verifyPassword(password) {
     return new Promise(async (resolve, reject) => {

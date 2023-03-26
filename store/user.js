@@ -17,6 +17,7 @@ export const userStoreNames = {
     updatePropertyBranchOffice: 'user/updatePropertyBranchOffice',
     add: 'user/add',
     update: 'user/update',
+    delete: 'user/delete',
   },
 }
 
@@ -110,5 +111,11 @@ export const mutations = {
 
     state._users[userIndex] = user
     state._users = [...state._users]
+  },
+  delete(state, { userID }) {
+    const userIndex = state._users.findIndex((u) => u.id === userID)
+    if (userIndex > -1) {
+      state._users.splice(userIndex, 1)
+    }
   },
 }

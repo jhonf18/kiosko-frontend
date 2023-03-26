@@ -45,58 +45,64 @@
         </thead>
         <tbody>
           <tr v-for="user in users" class="border-b bg-white hover:bg-gray-100">
-            <td class="flex flex-col p-4">
-              <span class="font-semibold text-sm md:text-base">
-                {{ user.name }}
-              </span>
-              <span class="text-gray-700 text-xs md:text-sm">
-                {{ user.nickname }}
-              </span>
-            </td>
-            <td class="p-4 text-sm">
-              <span class="">{{ user.role | roleName }}</span>
-            </td>
-            <td class="p-4 text-sm">
-              <span v-if="user.branch_office">{{
-                user.branch_office.name
-              }}</span>
-              <span v-else>No asignada</span>
-            </td>
-            <td class="p-4 text-sm">
-              <div class="flex items-center justify-center md:justify-start">
-                <div
-                  class="h-2.5 w-2.5 rounded-full bg-green-500 mr-2"
-                  :class="user.active ? 'bg-green-500' : 'bg-red-500'"
-                ></div>
-                <span class="hidden md:inline-block">
-                  {{ user.active ? 'Activo' : 'Inhabilitado' }}
+            <template v-if="user.role !== 'ROLE_ADMIN'">
+              <td class="flex flex-col p-4">
+                <span class="font-semibold text-sm md:text-base">
+                  {{ user.name }}
                 </span>
-              </div>
-            </td>
-            <td class="p-4">
-              <div class="flex items-center">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  class="mr-3"
-                  @click="openModalEditUser(user)"
-                >
-                  <span class="flex w-full items-center">
-                    <EditIcon class="w-4 h-4 lg:w-5 lg:h-5"></EditIcon>
-                    <span class="hidden lg:block">
-                      Editar
-                      <span class="hidden xl:inline-block">usuario</span>
+                <span class="text-gray-700 text-xs md:text-sm">
+                  {{ user.nickname }}
+                </span>
+              </td>
+              <td class="p-4 text-sm">
+                <span class="">{{ user.role | roleName }}</span>
+              </td>
+              <td class="p-4 text-sm">
+                <span v-if="user.branch_office">{{
+                  user.branch_office.name
+                }}</span>
+                <span v-else>No asignada</span>
+              </td>
+              <td class="p-4 text-sm">
+                <div class="flex items-center justify-center md:justify-start">
+                  <div
+                    class="h-2.5 w-2.5 rounded-full bg-green-500 mr-2"
+                    :class="user.active ? 'bg-green-500' : 'bg-red-500'"
+                  ></div>
+                  <span class="hidden md:inline-block">
+                    {{ user.active ? 'Activo' : 'Inhabilitado' }}
+                  </span>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    class="mr-3"
+                    @click="openModalEditUser(user)"
+                  >
+                    <span class="flex w-full items-center">
+                      <EditIcon class="w-4 h-4 lg:w-5 lg:h-5"></EditIcon>
+                      <span class="hidden lg:block">
+                        Editar
+                        <span class="hidden xl:inline-block">usuario</span>
+                      </span>
                     </span>
-                  </span>
-                </Button>
-                <Button size="sm" variant="danger">
-                  <span class="flex w-full items-center">
-                    <TrashIcon class="w-4 h-4 lg:w-5 lg:h-5"></TrashIcon>
-                    <span class="hidden lg:block">Eliminar</span>
-                  </span>
-                </Button>
-              </div>
-            </td>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    @click="openModalDeleteUser(user)"
+                  >
+                    <span class="flex w-full items-center">
+                      <TrashIcon class="w-4 h-4 lg:w-5 lg:h-5"></TrashIcon>
+                      <span class="hidden lg:block">Eliminar</span>
+                    </span>
+                  </Button>
+                </div>
+              </td>
+            </template>
           </tr>
         </tbody>
       </table>
@@ -107,12 +113,18 @@
       ref="modal-edit-user"
       :userStore="userStore"
     ></ModalEditUser>
+    <ModalDeleteUser
+      id="modal-delete-user"
+      ref="modal-delete-user"
+      :user="userStore"
+    ></ModalDeleteUser>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import ModalAddUser from '~/components/blocks/Modals/ModalAddUser.vue'
+import ModalDeleteUser from '~/components/blocks/Modals/ModalDeleteUser.vue'
 import ModalEditUser from '~/components/blocks/Modals/ModalEditUser.vue'
 import { userStoreNames } from '~/store/user'
 
@@ -134,6 +146,7 @@ export default {
     PlusIcon: () => import('@/static/icons/plus.svg?inline'),
     ModalAddUser,
     ModalEditUser,
+    ModalDeleteUser,
   },
   methods: {
     openModalAddUser() {
@@ -145,6 +158,10 @@ export default {
     async openModalEditUser(user) {
       this.userStore = user
       await this.$refs['modal-edit-user'].open()
+    },
+    openModalDeleteUser(user) {
+      this.userStore = user
+      this.$refs['modal-delete-user'].open()
     },
   },
   computed: {
