@@ -95,6 +95,10 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
+import { formatErrorMessages } from '~/assets/utils/formatErrorMessage'
+import { generalStoreNames } from '~/store/general'
+
 export default {
   name: 'LoginForm',
   components: {
@@ -117,6 +121,9 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      showToast: generalStoreNames.mutations.showToast,
+    }),
     async signinUser() {
       try {
         await this.$auth.loginWith('local', {
@@ -128,10 +135,12 @@ export default {
           localStorage.setItem('dataUserLogin', this.nickname)
         }
       } catch (err) {
-        console.log(
-          '🚀 ~ file: index.vue:25 ~ signinUser ~ err:',
-          err.response.data.error
-        )
+        const errorMessage = err.response.data.error
+          ? err.response.data.error.message
+          : 'Ha ocurrido un error inesperado en el servidor.'
+        this.showToast({
+          text: formatErrorMessages(errorMessage),
+        })
       }
     },
     loginWithOtherNickname() {

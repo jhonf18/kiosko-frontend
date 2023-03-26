@@ -30,7 +30,7 @@
                 ref="dropdown-button-profile"
                 class="w-9 h-9 rounded-full flex-none bg-primary-dark flex items-center justify-center font-semibold text-white text-center"
               >
-                JP
+                {{ $auth.user.name | uppercaseInitials }}
               </span>
             </button>
             <div

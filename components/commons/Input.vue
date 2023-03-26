@@ -13,7 +13,7 @@
           :id="idInput"
           :value="value"
           :disabled="disabled"
-          :type="input.type"
+          :type="type"
           :placeholder="placeholder"
           class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
           :class="{
@@ -36,7 +36,7 @@
             :id="idInput"
             :value="value"
             :disabled="disabled"
-            :type="input.type"
+            :type="type"
             :placeholder="placeholder"
             class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
             :class="{

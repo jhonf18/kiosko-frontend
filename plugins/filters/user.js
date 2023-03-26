@@ -17,4 +17,14 @@ export default () => {
 
     return 'No asignado'
   })
+
+  Vue.filter('uppercaseInitials', (nameUser) => {
+    const nameUserWithoutSpaces = nameUser.trim()
+
+    const nameArray = nameUserWithoutSpaces.split(' ')
+    const name = nameArray[0]
+    const lastname = nameArray[1] || ''
+
+    return `${name.charAt(0)}${lastname.charAt(0)}`
+  })
 }
