@@ -98,6 +98,7 @@ export default {
       this.$refs[`modal-confirm-password-${this.id}`].open()
     },
     close() {
+      this.password = ''
       this.$refs[`modal-confirm-password-${this.id}`].closeByButton()
     },
   },

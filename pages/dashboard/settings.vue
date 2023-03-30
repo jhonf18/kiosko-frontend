@@ -169,6 +169,9 @@ export default {
           visibleTime: 2,
         })
         this.setLoading(false)
+
+        this.user.password_1 = ''
+        this.user.password_2 = ''
       } catch (err) {
         this.showToast({
           text: formatErrorMessages(err.message),
