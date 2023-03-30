@@ -29,6 +29,9 @@
           v-on="$listeners"
           @input="onInput"
           @blur="onBlur"
+          @keydown="$emit('keyDown')"
+          @keyup="$emit('keyUp')"
+          @keydown.enter="$emit('keyDownEnter')"
         />
       </template>
       <template v-else>
@@ -37,6 +40,7 @@
             :id="idInput"
             :value="value"
             :disabled="disabled"
+            :autocomplete="autocomplete"
             :type="input.type"
             :placeholder="placeholder"
             class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
@@ -49,6 +53,8 @@
             v-on="$listeners"
             @input.trim="onInput"
             @blur="onBlur"
+            @keydown="$emit('keyDown')"
+            @keyup="$emit('keyUp')"
           />
         </label>
       </template>
@@ -86,7 +92,7 @@ import {
   isNotEqualPasswords,
 } from '~/assets/utils/validations'
 
-const TYPES = ['text', 'number', 'email', 'url', 'password']
+const TYPES = ['text', 'number', 'email', 'url', 'password', 'search']
 
 export default {
   components: {
@@ -101,6 +107,11 @@ export default {
     value: {
       type: [String, Number],
       default: '',
+    },
+    autocomplete: {
+      type: String,
+      default: 'on',
+      validator: (value) => ['on', 'off'].includes(value),
     },
     idInput: {
       type: String,
