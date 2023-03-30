@@ -13,15 +13,16 @@
           :id="idInput"
           :value="value"
           :disabled="disabled"
-          :type="type"
+          :type="input.type"
           :placeholder="placeholder"
           class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
           :class="{
             'error-input':
               onError === 'empty' ||
               onError === 'not-equal' ||
-              (onError === 'invalid' && type !== 'password'),
-            'warning-input-pwd': onError === 'invalid' && type === 'password',
+              (onError === 'invalid' && input.type !== 'password'),
+            'warning-input-pwd':
+              onError === 'invalid' && input.type === 'password',
             'py-2.5 text-sm': size === 'md',
             'py-4 text-base': size === 'lg',
           }"
@@ -36,7 +37,7 @@
             :id="idInput"
             :value="value"
             :disabled="disabled"
-            :type="type"
+            :type="input.type"
             :placeholder="placeholder"
             class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
             :class="{

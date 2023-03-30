@@ -34,14 +34,15 @@
               </span>
             </button>
             <div
-              class="z-50 absolute top-8 right-0 my-4 h-auto text-base overflow-hidden list-none transition-all bg-white divide-y divide-gray-100 rounded duration-300 min-w-[200px]"
+              class="z-50 absolute top-8 right-0 my-4 h-auto text-base overflow-hidden list-none transition-all bg-white divide-y divide-gray-100 rounded duration-300 min-w-[250px]"
               :class="
                 openDropdown ? 'shadow-sm border max-h-[400px]' : 'max-h-0'
               "
             >
               <div class="px-4 py-3" role="none">
                 <p class="text-sm text-gray-900" role="none">
-                  {{ `${$auth.user.name} (${$auth.user.nickname})` }}
+                  {{ `${$auth.user.name}` }}
+                  <span class="text-xs"> ({{ $auth.user.nickname }}) </span>
                 </p>
                 <p
                   class="text-sm font-medium text-gray-900 truncate"
@@ -50,7 +51,7 @@
                   {{ $auth.user.email }}
                 </p>
               </div>
-              <ul class="py-1" role="none">
+              <ul class="py-2" role="none">
                 <li>
                   <nuxt-link
                     to="/dashboard/settings"

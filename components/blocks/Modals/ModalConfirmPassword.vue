@@ -2,14 +2,14 @@
   <Modal
     :id="`modal-confirm-password-${id}`"
     :ref="`modal-confirm-password-${id}`"
-    title="Confirmar contraseña"
+    :title="title ? title : 'Confirmar contraseña'"
     size="md"
     :footer="false"
   >
     <Input
       label="Ingresa la contraseña de tu cuenta"
       v-model="password"
-      id-input="verify-password"
+      id-input="verify-password-for-confirm"
       type="password"
       placeholder="Contraseña"
       class="mb-4"
@@ -36,6 +36,11 @@ export default {
     id: {
       type: String,
       required: true,
+    },
+    title: {
+      type: String,
+      required: false,
+      default: undefined,
     },
   },
   data() {

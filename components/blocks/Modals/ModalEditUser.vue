@@ -192,6 +192,7 @@ export default {
         return
       }
 
+      // Si el rol es adminstrador, no es necesario añadir la sucursal
       if (!this.user.branch_office || !this.user.role) {
         const text = !this.user.branch_office
           ? 'Debes seleccionar una sucursal'
@@ -205,12 +206,7 @@ export default {
       }
 
       let password = null
-      if (
-        this.user.password_1 &&
-        this.user.password_1.length > 0 &&
-        this.user.password_2 &&
-        this.user.password_2 > 0
-      ) {
+      if (this.user.password_1 && this.user.password_2) {
         if (this.user.password_1 !== this.user.password_2) {
           this.showToast({
             text: 'Las contraseñas son distintas.',
@@ -223,6 +219,8 @@ export default {
         password = this.user.password_1
       }
 
+      password = password && password.length > 0 ? password : null
+
       try {
         const user = await this.$userRepository.update(this.user.id, {
           name: this.user.name,
@@ -231,8 +229,6 @@ export default {
           role: this.user.role,
           password,
         })
-
-        console.log(this.user.branch_office_id)
 
         this.updateUser(user)
         this.updateEmployee({
