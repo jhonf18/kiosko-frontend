@@ -12,6 +12,9 @@ export const ingredientStoreNames = {
   actions: { load: 'ingredient/load' },
   mutations: {
     set: 'ingredient/set',
+    add: 'ingredient/add',
+    update: 'ingredient/update',
+    delete: 'ingredient/delete',
   },
 }
 
@@ -48,5 +51,23 @@ export const actions = {
 export const mutations = {
   set(state, ingredients) {
     state._ingredients = ingredients
+  },
+  add(state, ingredient) {
+    state._ingredients.push(ingredient)
+  },
+  update(state, ingredient) {
+    const index = state._ingredients.findIndex((i) => i.id === ingredient.id)
+
+    if (index > -1) {
+      state._ingredients[index] = ingredient
+      state._ingredients = [...state._ingredients]
+    }
+  },
+  delete(state, { ingredientID }) {
+    const index = state._ingredients.findIndex((i) => i.id === ingredientID)
+
+    if (index > -1) {
+      state._ingredients.splice(index, 1)
+    }
   },
 }

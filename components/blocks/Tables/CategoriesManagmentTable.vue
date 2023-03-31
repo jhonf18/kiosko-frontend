@@ -85,7 +85,7 @@ import ModalEditCategory from '../Modals/ModalEditCategory.vue'
 export default {
   name: 'CategoriesTable',
   async created() {
-    if (!this.categoriesStore) this.loadCategories()
+    if (!this.categoriesStore) await this.loadCategories()
   },
   data() {
     return {

@@ -10,6 +10,7 @@
       :id="id"
       @change="onChange"
       v-model="content"
+      :disabled="disabled"
       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none focus:outline-gray-400"
     >
       <option
@@ -34,6 +35,10 @@ export default {
     value: {
       type: [String, Number, Boolean],
       default: null,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
     label: {
       type: String,

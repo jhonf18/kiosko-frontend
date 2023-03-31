@@ -59,7 +59,7 @@
                   size="sm"
                   variant="primary"
                   class="mr-3"
-                  @click="openEditModal(category)"
+                  @click="openEditModal(ingredient)"
                 >
                   <span class="flex w-full items-center">
                     <EditIcon class="w-4 h-4 lg:w-5 lg:h-5"></EditIcon>
@@ -72,7 +72,7 @@
                 <Button
                   size="sm"
                   variant="danger"
-                  @click="openDeleteModal(branchOffice)"
+                  @click="openDeleteModal(ingredient)"
                 >
                   <span class="flex w-full items-center">
                     <TrashIcon class="w-4 h-4 lg:w-5 lg:h-5"></TrashIcon>
@@ -89,7 +89,8 @@
       </table>
       <div
         class="w-full p-6 text-center font-semibold"
-        v-if="!ingredients || ingredients.length === 0">
+        v-if="!ingredients || ingredients.length === 0"
+      >
         <h5>
           {{
             search.length > 0
@@ -99,6 +100,15 @@
         </h5>
       </div>
     </div>
+    <ModalAddIngredient ref="modal-add-ingredient"></ModalAddIngredient>
+    <ModalEditIngredient
+      ref="modal-edit-ingredient"
+      :ingredientForEdit="ingredientForEdit"
+    ></ModalEditIngredient>
+    <ModalDeleteIngredient
+      ref="modal-delete-ingredient"
+      :ingredient="ingredientForEdit"
+    ></ModalDeleteIngredient>
   </div>
 </template>
 
@@ -106,35 +116,56 @@
 import { mapActions, mapGetters } from 'vuex'
 import { normalizeText } from '~/assets/utils/normalize'
 import { ingredientStoreNames } from '~/store/ingredient'
+import ModalAddIngredient from '../Modals/ModalAddIngredient.vue'
+import ModalDeleteIngredient from '../Modals/ModalDeleteIngredient.vue'
+import ModalEditIngredient from '../Modals/ModalEditIngredient.vue'
 
 export default {
   name: 'IngredientsManagmentTable',
   data() {
-    return { ingredients: [], search: '' }
+    return {
+      ingredients: [],
+      search: '',
+      ingredientForEdit: { name: '', type: null },
+    }
   },
   async created() {
-    if (!this.ingredientsStore) this.loadIngredients()
+    if (!this.ingredientsStore) await this.loadIngredients()
+
+    this.ingredients = this.ingredientsStore
   },
   components: {
     PlusIcon: () => import('@/static/icons/plus.svg?inline'),
     EditIcon: () => import('@/static/icons/edit.svg?inline'),
     CheckIcon: () => import('@/static/icons/check.svg?inline'),
     TrashIcon: () => import('@/static/icons/trash.svg?inline'),
+    ModalEditIngredient,
+    ModalAddIngredient,
+    ModalDeleteIngredient,
   },
   methods: {
     ...mapActions({
       loadIngredients: ingredientStoreNames.actions.load,
     }),
     searchIngredient() {
+      // TODO: Limpiar parametro de busqueda al dar click en la x, también despues de editar el perfil
       const search = normalizeText(this.search.toLowerCase())
       this.ingredients = this.ingredientsStore.filter((ingredient) => {
         const name = normalizeText(ingredient.name.toLocaleLowerCase())
         return name.includes(search)
       })
     },
-    openModalAddIngredient() {},
-    openDeleteModal() {},
-    openEditModal() {},
+    openModalAddIngredient() {
+      this.$refs['modal-add-ingredient'].open()
+    },
+    openDeleteModal(ingredient) {
+      this.ingredientForEdit = ingredient
+      this.$refs['modal-delete-ingredient'].open()
+    },
+    openEditModal(ingredient) {
+      this.ingredientForEdit = ingredient
+      this.$refs['modal-edit-ingredient'].open()
+    },
   },
   computed: {
     ...mapGetters({
