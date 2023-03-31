@@ -9,54 +9,69 @@
     </label>
     <div class="relative">
       <template v-if="label !== ''">
-        <input
-          :id="idInput"
-          :value="value"
-          :disabled="disabled"
-          :type="input.type"
-          :placeholder="placeholder"
-          class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
-          :class="{
-            'error-input':
-              onError === 'empty' ||
-              onError === 'not-equal' ||
-              (onError === 'invalid' && input.type !== 'password'),
-            'warning-input-pwd':
-              onError === 'invalid' && input.type === 'password',
-            'py-2.5 text-sm': size === 'md',
-            'py-4 text-base': size === 'lg',
-          }"
-          v-on="$listeners"
-          @input="onInput"
-          @blur="onBlur"
-          @keydown="$emit('keyDown')"
-          @keyup="$emit('keyUp')"
-          @keydown.enter="$emit('keyDownEnter')"
-        />
-      </template>
-      <template v-else>
-        <label>
+        <div>
+          <SearchIcon v-if="input.type === 'search'"></SearchIcon>
           <input
             :id="idInput"
             :value="value"
             :disabled="disabled"
-            :autocomplete="autocomplete"
             :type="input.type"
             :placeholder="placeholder"
             class="px-4 border border-gray-300 w-full rounded focus:outline-none focus:border-gray-400"
             :class="{
-              'error-input': onError === 'empty' || onError === 'not-equal',
-              'warning-input-pwd': onError === 'invalid',
+              'error-input':
+                onError === 'empty' ||
+                onError === 'not-equal' ||
+                (onError === 'invalid' && input.type !== 'password'),
+              'warning-input-pwd':
+                onError === 'invalid' && input.type === 'password',
               'py-2.5 text-sm': size === 'md',
               'py-4 text-base': size === 'lg',
             }"
             v-on="$listeners"
-            @input.trim="onInput"
+            @input="onInput"
             @blur="onBlur"
             @keydown="$emit('keyDown')"
             @keyup="$emit('keyUp')"
+            @keydown.enter="$emit('keyDownEnter')"
           />
-        </label>
+        </div>
+      </template>
+      <template v-else>
+        <div class="flex w-full">
+          <label
+            :class="
+              input.type === 'search'
+                ? 'flex items-center border border-gray-300 pl-2 rounded'
+                : 'w-full'
+            "
+          >
+            <SearchIcon v-if="input.type === 'search'"></SearchIcon>
+            <input
+              :id="idInput"
+              :value="value"
+              :disabled="disabled"
+              :autocomplete="autocomplete"
+              :type="input.type"
+              :placeholder="placeholder"
+              class="px-4 w-full rounded"
+              :class="{
+                'error-input': onError === 'empty' || onError === 'not-equal',
+                'warning-input-pwd': onError === 'invalid',
+                'py-2.5 text-sm': size === 'md',
+                'py-4 text-base': size === 'lg',
+                'border border-gray-300 focus:outline-none focus:border-gray-400':
+                  input.type !== 'search',
+                '!pl-2': input.type === 'search',
+              }"
+              v-on="$listeners"
+              @input.trim="onInput"
+              @blur="onBlur"
+              @keydown="$emit('keyDown')"
+              @keyup="$emit('keyUp')"
+            />
+          </label>
+        </div>
       </template>
       <template v-if="type === 'password'">
         <EyesIcon
@@ -98,6 +113,7 @@ export default {
   components: {
     EyesIcon: () => import('@/static/icons/eyes.svg?inline'),
     EyesOffIcon: () => import('@/static/icons/eyes-off.svg?inline'),
+    SearchIcon: () => import('@/static/icons/search.svg?inline'),
   },
   model: {
     prop: 'value',
