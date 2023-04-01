@@ -10,6 +10,7 @@
       :id="id"
       @change="onChange"
       v-model="content"
+      :multiple="multiple"
       :disabled="disabled"
       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none focus:outline-gray-400"
     >
@@ -49,6 +50,10 @@ export default {
       type: Array,
       required: true,
     },
+    multiple: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -59,6 +64,7 @@ export default {
   methods: {
     onChange() {
       this.$emit('update', this.content)
+      this.$emit('change', this.content)
     },
   },
 }

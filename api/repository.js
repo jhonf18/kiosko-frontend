@@ -1,6 +1,7 @@
 import { branchOfficeRepository } from './branchOfficeRepository.js'
 import { categoryRepository } from './categoryRepository.js'
 import { ingredientRepository } from './ingredientRepository.js'
+import { productRepository } from './productRepository.js'
 import { userRepository } from './userRepository.js'
 
 export class Repository {
@@ -22,5 +23,9 @@ export class Repository {
 
   getIngredientRepository() {
     return ingredientRepository(this.$axios)
+  }
+
+  getProductRepository() {
+    return productRepository(this.$axios)
   }
 }

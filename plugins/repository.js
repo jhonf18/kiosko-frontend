@@ -8,4 +8,6 @@ export default (ctx, inject) => {
   inject('userRepository', repositoryWithAxios.getUserRepository())
   inject('categoryRepository', repositoryWithAxios.getCategoryRepository())
   inject('ingredientRepository', repositoryWithAxios.getIngredientRepository())
+  inject('ingredientRepository', repositoryWithAxios.getIngredientRepository())
+  inject('productRepository', repositoryWithAxios.getProductRepository())
 }

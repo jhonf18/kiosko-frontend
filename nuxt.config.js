@@ -48,6 +48,7 @@ export default {
   plugins: [
     '@/plugins/axios.js',
     '@/plugins/filters/user.js',
+    '@/plugins/filters/product.js',
     '@/plugins/repository.js',
   ],
 
@@ -72,6 +73,8 @@ export default {
     '@nuxtjs/auth',
     // https://www.npmjs.com/package/@nuxtjs/svg
     '@nuxtjs/svg',
+    // https://cloudinary.nuxtjs.org
+    '@nuxtjs/cloudinary',
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
@@ -156,6 +159,13 @@ export default {
       logout: '/login',
     },
     fullPathRedirect: true,
+  },
+
+  cloudinary: {
+    cloudName: process.env.CLOUD_NAME_CLOUDINARY,
+    apiKey: process.env.API_KEY_CLOUDINARY,
+    apiSecret: process.env.API_SECRET_CLOUDINARY,
+    secure: process.env.NODe_ENV !== 'development',
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
