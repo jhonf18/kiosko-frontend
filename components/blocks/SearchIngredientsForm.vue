@@ -40,7 +40,7 @@
         >
           <span class="flex items-center">
             <CheckIcon class="w-4 h-4 stroke-primary-dark mr-1"></CheckIcon>
-            {{ ingredient.quantity ? `${ingredient.quantity} de ` : '' }}
+            {{ ingredient.quantity ? `${ingredient.quantity} ` : '' }}
             {{ ingredient.name }}
           </span>
           <TrashIcon
@@ -60,6 +60,12 @@ import SearchWithAutocomplete from '../special/SearchWithAutocomplete.vue'
 
 export default {
   name: 'SearchIngredientsForm',
+  props: {
+    ingredientsSelectedStore: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       quantity: '',
@@ -93,11 +99,9 @@ export default {
       }
     },
     onDeleteIngredient(ingredient) {
-      const index = this.ingredientsSelected.findIndex(
-        (item) => item.id !== ingredient.id
+      this.ingredientsSelected = this.ingredientsSelected.filter(
+        (ingredet) => ingredet.id !== ingredient.id
       )
-
-      this.ingredientsSelected.splice(index, 1)
       const ingredientsWithFormat = this.formatIngredients()
 
       this.$emit('updateSelection', ingredientsWithFormat)
@@ -124,19 +128,29 @@ export default {
     formatIngredients() {
       return this.ingredientsSelected.map((ingredient) => {
         return {
-          ingredient: ingredient.id,
+          ...ingredient,
           quantity: ingredient.quantity || null,
         }
       })
+    },
+    setIngredients(ingredients) {
+      this.ingredientsSelected = [...ingredients]
     },
   },
   async created() {
     if (!this.ingredientsStore) await this.loadIngredients()
     this.ingredients = [...this.ingredientsStore]
+
+    if (this.ingredientsSelectedStore) {
+      this.setIngredients(this.ingredientsSelectedStore)
+    }
   },
   watch: {
     ingredientsStore() {
       this.ingredients = [...this.ingredientsStore]
+    },
+    ingredientsSelectedStore() {
+      this.setIngredients(this.ingredientsSelectedStore)
     },
   },
 }

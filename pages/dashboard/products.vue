@@ -131,6 +131,17 @@
       id="modal-add-product"
       ref="modal-add-product"
     ></ModalAddProduct>
+
+    <ModalEditProduct
+      id="moda-edit-product"
+      ref="modal-edit-product"
+      :productStore="productSelected"
+    ></ModalEditProduct>
+
+    <ModalDeleteProduct
+      ref="modal-delete-product"
+      :productStore="productSelected"
+    ></ModalDeleteProduct>
   </div>
 </template>
 
@@ -138,6 +149,8 @@
 import { mapActions, mapGetters } from 'vuex'
 import { normalizeText } from '~/assets/utils/normalize'
 import ModalAddProduct from '~/components/blocks/Modals/ModalAddProduct.vue'
+import ModalDeleteProduct from '~/components/blocks/Modals/ModalDeleteProduct.vue'
+import ModalEditProduct from '~/components/blocks/Modals/ModalEditProduct.vue'
 import { branchOfficeStoreNames } from '~/store/branchOffice'
 import { productStoreNames } from '~/store/product'
 
@@ -151,6 +164,11 @@ export default {
       search: '',
       optionsSelect: [],
       filterSelect: null,
+      productSelected: {
+        category: '',
+        selected_ingredients: [],
+        passage_sections: [],
+      },
     }
   },
   computed: {
@@ -178,8 +196,9 @@ export default {
         value: b.id,
       }))
       this.optionsSelect.unshift({
-        name: 'Filtrar por sucursal',
+        name: 'Todas las sucursales',
         value: null,
+        canSelected: true,
       })
     }
   },
@@ -191,22 +210,41 @@ export default {
     openModalAddProduct() {
       this.$refs['modal-add-product'].open()
     },
-    openModalEditProduct() {},
-    openModalDeleteProduct() {},
+    openModalEditProduct(product) {
+      this.productSelected = product
+      this.$refs['modal-edit-product'].open()
+    },
+    openModalDeleteProduct(product) {
+      this.productSelected = product
+      this.$refs['modal-delete-product'].open()
+    },
     searchProduct() {
-      const search = normalizeText(this.search.toLowerCase())
-      this.products = this.productsStore.filter((product) => {
-        const name = normalizeText(product.name.toLocaleLowerCase())
-        return name.includes(search)
-      })
+      if (this.filterSelect) {
+        const products = (this.products = this.productsStore.filter(
+          (p) => p.branch_office.id === this.filterSelect
+        ))
+        const search = normalizeText(this.search.toLowerCase())
+        this.products = products.filter((product) => {
+          const name = normalizeText(product.name.toLocaleLowerCase())
+          return name.includes(search)
+        })
+      } else {
+        const search = normalizeText(this.search.toLowerCase())
+        this.products = this.productsStore.filter((product) => {
+          const name = normalizeText(product.name.toLocaleLowerCase())
+          return name.includes(search)
+        })
+      }
     },
     onChangeFilter() {
       if (this.filterSelect) {
         this.products = this.productsStore.filter(
           (p) => p.branch_office.id === this.filterSelect
         )
-        this.search = ''
+      } else {
+        this.products = [...this.productsStore]
       }
+      this.search = ''
     },
   },
   components: {
@@ -214,6 +252,8 @@ export default {
     TrashIcon: () => import('@/static/icons/trash.svg?inline'),
     PlusIcon: () => import('@/static/icons/plus.svg?inline'),
     ModalAddProduct,
+    ModalEditProduct,
+    ModalDeleteProduct,
   },
   watch: {
     productsStore: {

@@ -50,6 +50,7 @@ export default {
     '@/plugins/filters/user.js',
     '@/plugins/filters/product.js',
     '@/plugins/repository.js',
+    '@/plugins/imagesRepository.js',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

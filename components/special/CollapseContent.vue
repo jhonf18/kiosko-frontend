@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex items-center mb-2 cursor-pointer" @click="toggleContent">
+    <div class="flex items-center mb-3 cursor-pointer" @click="toggleContent">
       <div class="min-w-[125px]">
         <h3 class="font-semibold">{{ title }}</h3>
       </div>

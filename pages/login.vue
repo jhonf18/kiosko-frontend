@@ -11,6 +11,7 @@ import LoginForm from '~/components/blocks/LoginForm.vue'
 
 export default {
   name: 'LoginPage',
+  middleware: ['authLogin'],
   components: {
     LoginForm,
   },

@@ -89,7 +89,7 @@
 
     <CollapseContent
       title="Más opciones"
-      class="mb-4"
+      class="mb-8 mt-4"
       ref="collapse-content-add-product"
     >
       <SearchPassingSectionsForm
@@ -101,7 +101,9 @@
         @updateSelection="handleIngredientSelection"
       ></SearchIngredientsForm>
     </CollapseContent>
-    <!-- RESUMEN DEL PRODUCTO -->
+
+    <SummaryProduct :product="product"></SummaryProduct>
+
     <div class="flex justify-end mt-8 mb-2">
       <ButtonWithSpinner
         @click="createProduct"
@@ -115,7 +117,6 @@
 <script>
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { formatErrorMessages } from '~/assets/utils/formatErrorMessage'
-import Accordion from '~/components/blocks/Accordion/Accordion'
 import CollapseContent from '~/components/special/CollapseContent.vue'
 import SearchWithAutocomplete from '~/components/special/SearchWithAutocomplete.vue'
 import { branchOfficeStoreNames } from '~/store/branchOffice'
@@ -124,6 +125,7 @@ import { generalStoreNames } from '~/store/general'
 import { productStoreNames } from '~/store/product'
 import SearchIngredientsForm from '../SearchIngredientsForm.vue'
 import SearchPassingSectionsForm from '../SearchPassingSectionsForm.vue'
+import SummaryProduct from '../SummaryProduct.vue'
 
 export default {
   name: 'ModalAddProduct',
@@ -143,16 +145,12 @@ export default {
         subcategory: null,
         branchOffice: null,
         imageFile: null,
+        imagePreview: null,
         passage_sections: [],
         ingredients: [],
       },
       categories: [],
       subcategories: [{ name: 'Subcategoría', value: null }],
-      sections: [
-        { name: 'Secciones de paso', value: null },
-        { name: 'COCINA', value: 'COCINA' },
-        { name: 'HORNO', value: 'HORNO' },
-      ],
       branchOffices: [],
       buttonText: 'Crear producto',
       loading: false,
@@ -160,11 +158,11 @@ export default {
     }
   },
   components: {
-    Accordion,
     SearchWithAutocomplete,
     CollapseContent,
     SearchPassingSectionsForm,
     SearchIngredientsForm,
+    SummaryProduct,
   },
   computed: {
     ...mapGetters({
@@ -203,14 +201,16 @@ export default {
         // Upload image to cloudinary
         let urlImage
         if (this.product.imageFile) {
-          const instance = await this.$cloudinary.upload(
-            this.product.imageFile,
-            {
-              uploadPreset: 'kiosko_dev',
-              public_id: `product-image-${new Date().getTime()}`,
-            }
-          )
-          urlImage = instance.secure_url
+          urlImage = await this.$uploadImages(this.product.imageFile)
+        }
+
+        let ingredients = null
+
+        if (this.product.ingredients.length > 0) {
+          ingredients = this.product.ingredients.map((ingredient) => ({
+            ingredient: ingredient.id,
+            quantity: ingredient.quantity,
+          }))
         }
 
         // Create product
@@ -222,6 +222,11 @@ export default {
           category: this.product.category,
           subcategory: this.product.subcategory,
           branch_office: this.product.branchOffice,
+          passage_sections:
+            this.product.passage_sections.length > 0
+              ? this.product.passage_sections
+              : null,
+          selected_ingredients: ingredients,
         })
         // Add product to store
         this.addProduct(product)
@@ -291,16 +296,13 @@ export default {
         new Promise((resolve) => {
           const reader = new FileReader()
           reader.onloadend = () => resolve(reader.result)
+          reader.onload = (e) => {
+            this.product.imagePreview = reader.result
+          }
           reader.readAsDataURL(f)
         })
       /* Read data */
       this.product.imageFile = await readData(file)
-      /* upload the converted data */
-      // const instance = await this.$cloudinary.upload(data, {
-      //   uploadPreset: 'kiosko_dev',
-      //   public_id: 'my-custom-ids',
-      // })
-      //console.log(instance.secure_url)
     },
     setBranchOffices(branchOffices) {
       branchOffices = branchOffices || []

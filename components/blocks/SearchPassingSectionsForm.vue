@@ -40,6 +40,12 @@ import SearchWithAutocomplete from '../special/SearchWithAutocomplete.vue'
 
 export default {
   name: 'SearchPassingSectionsForm',
+  props: {
+    passingSections: {
+      type: Array,
+      default: () => [],
+    },
+  },
   components: {
     SearchWithAutocomplete,
     TrashIcon: () => import('@/static/icons/trash.svg?inline'),
@@ -64,7 +70,15 @@ export default {
     deletePassageSection(section) {
       const index = this.sections.indexOf(section)
       this.sections.splice(index, 1)
-      this.$emit('updateSections', this.sections)
+      this.$emit('updateSelection', this.sections)
+    },
+  },
+  watch: {
+    passingSections: {
+      handler: function (val) {
+        this.sections = [...val]
+      },
+      immediate: true,
     },
   },
 }

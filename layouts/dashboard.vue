@@ -166,6 +166,8 @@ const navigation = [
   },
 ]
 export default {
+  middleware: ['authAdmin'],
+  name: 'DashboardLayout',
   data() {
     return {
       navigation,

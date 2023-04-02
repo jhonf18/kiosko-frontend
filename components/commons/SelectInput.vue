@@ -17,7 +17,11 @@
       <option
         v-for="option in options"
         :value="option.value"
-        :disabled="!option.value && typeof option.value !== 'boolean'"
+        :disabled="
+          !option.value &&
+          typeof option.value !== 'boolean' &&
+          !option.canSelected
+        "
         :selected="typeof option.value === 'undefined' || !option.value"
       >
         {{ option.name }}
@@ -65,6 +69,11 @@ export default {
     onChange() {
       this.$emit('update', this.content)
       this.$emit('change', this.content)
+    },
+  },
+  watch: {
+    value() {
+      this.content = this.value
     },
   },
 }

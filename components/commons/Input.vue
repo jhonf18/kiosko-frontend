@@ -235,6 +235,11 @@ export default {
       this.blur = true
     },
   },
+  watch: {
+    type(newType) {
+      this.input.type = newType
+    },
+  },
 }
 </script>
 
