@@ -15,3 +15,23 @@ export const ingredientsFormatter = (ingredients) => {
 
   return array1.concat(array2, array3)
 }
+
+export const getPrettyIngredients = (ingredients) => {
+  const formatter = new Intl.ListFormat('es', {
+    style: 'long',
+    type: 'conjunction',
+  })
+
+  const ingredientsFormated = ingredientsFormatter(ingredients)
+  const ingredientsNames = ingredientsFormated.map((ingredient) => {
+    let ingredientName = ''
+    if (ingredient.quantity) {
+      ingredientName += `${ingredient.quantity} `
+    }
+    ingredientName += ingredient.name
+
+    return ingredientName
+  })
+
+  return `${formatter.format(ingredientsNames)}.`
+}

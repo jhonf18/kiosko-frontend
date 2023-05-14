@@ -23,7 +23,7 @@
           'max-w-3xl': size === 'lg',
         }"
       >
-        <header class="modal-header">
+        <header class="modal-header" v-if="showHeader">
           <h5
             :id="`modal-title-${id}`"
             class="md:text-xl text-lg font-semibold leading-normal"
@@ -40,11 +40,15 @@
           </div>
         </header>
         <div
+          v-if="!fullModal"
           :id="`modal-body-${id}`"
           :ref="`modal-body-${id}`"
           :style="stylesModalBody"
           class="modal-body overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-200 scrollbar-track-gray-100"
         >
+          <slot></slot>
+        </div>
+        <div v-else>
           <slot></slot>
         </div>
         <div v-if="footer" class="modal-footer">
@@ -86,7 +90,17 @@ export default {
       type: Boolean,
       required: false,
       default: true,
-    }
+    },
+    showHeader: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    fullModal: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {

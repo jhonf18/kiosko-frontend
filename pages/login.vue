@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: Show error message of login, as error in password or username -->
   <main
     class="min-h-screen w-full flex items-center justify-center transition-colors duration-200"
   >
@@ -11,6 +12,7 @@ import LoginForm from '~/components/blocks/LoginForm.vue'
 
 export default {
   name: 'LoginPage',
+  layout: 'empty',
   middleware: ['authLogin'],
   components: {
     LoginForm,
