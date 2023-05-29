@@ -1,10 +1,13 @@
 <template>
-  <div>
-    <div class="flex items-center mb-3 cursor-pointer" @click="toggleContent">
-      <div class="min-w-[125px]">
-        <h3 class="font-semibold">{{ title }}</h3>
+  <div
+    :class="{ 'border border-gray shadow-md px-2 py-2 rounded': withShadow }"
+  >
+    <div class="flex items-center cursor-pointer w-full" @click="toggleContent">
+      <div class="min-w-[125px]" :class="{ 'w-full': !title }">
+        <h3 class="font-semibold" v-if="title">{{ title }}</h3>
+        <slot name="title"></slot>
       </div>
-      <div class="border-t w-full"></div>
+      <div class="border-t w-full" v-if="title"></div>
       <div class="min-w-[35px]">
         <ChevronDown
           class="transition-all duration-300 w-7 h-7"
@@ -17,7 +20,7 @@
     <div
       :ref="refNameCollapse"
       class="gap-4 max-h-0 transition-all duration-300"
-      :class="{ 'overflow-hidden': !isOpen }"
+      :class="{ 'overflow-hidden': !isOpen, 'mt-3': isOpen }"
       :style="styles"
     >
       <slot></slot>
@@ -31,7 +34,12 @@ export default {
   props: {
     title: {
       type: String,
-      required: true,
+      required: false,
+    },
+    withShadow: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {

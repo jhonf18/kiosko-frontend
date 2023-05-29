@@ -49,7 +49,7 @@
                 </span>
                 <div
                   class="rounded-full bg-primary cursor-pointer hover:bg-primary-dark"
-                  @click="selectProduct"
+                  @click="selectProduct(product)"
                 >
                   <PlusIcon class="stroke-white w-7 h-7"></PlusIcon>
                 </div>
@@ -74,6 +74,7 @@
 
     <ModalAddProductToCart
       ref="modal-add-product-2-cart"
+      :product="productToAdd"
     ></ModalAddProductToCart>
   </div>
 </template>
@@ -144,10 +145,12 @@ export default {
       buttons,
       productsStore: [{ media_files: [] }],
       subcategories: [],
+      productToAdd: { media_files: [] },
     }
   },
   methods: {
-    selectProduct() {
+    selectProduct(product) {
+      this.productToAdd = product
       this.$refs['modal-add-product-2-cart'].open()
     },
     selectedSubcategory(subcategory, index) {

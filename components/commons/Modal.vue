@@ -48,7 +48,11 @@
         >
           <slot></slot>
         </div>
-        <div v-else>
+        <div
+          v-else
+          :style="stylesModalBody"
+          class="overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-200 scrollbar-track-gray-100"
+        >
           <slot></slot>
         </div>
         <div v-if="footer" class="modal-footer">
