@@ -24,7 +24,9 @@
           :category="category"
         ></ProductsCarousel>
       </template>
-      <template v-slot:menu-content-2> tab 2 </template>
+      <template v-slot:menu-content-2="{ active }">
+        <CartOfOrders :active="active"></CartOfOrders>
+      </template>
       <template v-slot:menu-content-3> tab 3 </template>
     </BottomTabs>
   </div>
@@ -32,6 +34,7 @@
 
 <script>
 import BottomTabs from '~/components/blocks/BottomTabs.vue'
+import CartOfOrders from '~/components/blocks/CartOfOrders.vue'
 import CategoriesBanner from '~/components/blocks/CategoriesBanner.vue'
 import ProductsCarousel from '~/components/blocks/ProductsCarousel.vue'
 
@@ -73,6 +76,7 @@ export default {
     TicketSolidIcon: () => import('@/static/icons/ticket-solid.svg?inline'),
     ProductsCarousel,
     CategoriesBanner,
+    CartOfOrders,
   },
   created() {
     this.getProducts()

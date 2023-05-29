@@ -212,7 +212,7 @@ export default {
 }
 */
 
-.card-move {
+.list-move {
   opacity: 1;
   transition: all 0.5s;
 }

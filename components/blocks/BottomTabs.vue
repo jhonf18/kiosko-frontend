@@ -9,7 +9,10 @@
             block: openTab === tabNumber,
           }"
         >
-          <slot :name="`menu-content-${tabNumber}`"></slot>
+          <slot
+            :name="`menu-content-${tabNumber}`"
+            :active="openTab === tabNumber"
+          ></slot>
         </div>
       </div>
       <ul
