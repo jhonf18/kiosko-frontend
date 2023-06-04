@@ -170,9 +170,23 @@ export default {
       product.ingredients_selected_text = getPrettyIngredients(
         product.ingredients_selected
       )
+
+      const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: false,
+      }
+
       const cart = [
         {
-          name: this.orderName,
+          name: `${this.orderName} - ${new Intl.DateTimeFormat(
+            'es-Es',
+            options
+          ).format(new Date())}`,
           waiter: this.$auth.user.id,
           products: [product],
           total: product.price,

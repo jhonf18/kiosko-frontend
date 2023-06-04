@@ -4,6 +4,7 @@
       <div class="relative flex flex-col bg-white w-full">
         <div
           v-for="tabNumber in tabs"
+          class="pb-10"
           :class="{
             hidden: openTab !== tabNumber,
             block: openTab === tabNumber,

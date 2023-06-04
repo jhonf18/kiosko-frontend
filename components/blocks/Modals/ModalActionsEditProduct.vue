@@ -24,19 +24,18 @@
         <span class="font-semibold text-primary text-lg">
           {{ product.price | formatCurrency }}
         </span>
-        <InputQuantity v-model="quantity"></InputQuantity>
       </div>
       <h4
         class="font-semibold text-lg mt-4"
         v-if="
-          product.selected_ingredients &&
-          product.selected_ingredients.length > 0
+          product.ingredients_selected &&
+          product.ingredients_selected.length > 0
         "
       >
         Descripción
       </h4>
       <p class="text-gray-600 text-sm">
-        {{ product.ingredients }}
+        {{ product.ingredients_selected_text }}
       </p>
 
       <CollapseContent
@@ -44,8 +43,8 @@
         ref="collapse-content-add-product"
         :withShadow="true"
         v-if="
-          product.selected_ingredients &&
-          product.selected_ingredients.length > 0
+          product.ingredients_selected &&
+          product.ingredients_selected.length > 0
         "
       >
         <template v-slot:title>
@@ -139,130 +138,69 @@
         </label>
       </div>
 
-      <Button
-        variant="primary"
-        size="block"
-        @click="showModalAddProduct"
-        class="mt-4"
-      >
-        Añadir al carrito
+      <Button variant="primary" size="block" @click="productEdit" class="mt-4">
+        Editar
       </Button>
     </div>
-    <ModalAddProductToOrder
-      @finished="close"
-      :product="productToSaved"
-      ref="modal-add-product-to-order"
-    ></ModalAddProductToOrder>
   </Modal>
 </template>
 
 <script>
-import ModalAddProductToOrder from '@/components/blocks/Modals/ModalAddProductToOrder.vue'
-import CollapseContent from '~/components/special/CollapseContent.vue'
+import { getPrettyIngredients } from '~/assets/utils/ingredientsFormatter'
 
 export default {
+  name: 'ModalActionsEditProduct',
   props: {
     product: {
       type: Object,
       required: true,
     },
   },
+  components: {
+    ChevronLeftIcon: () => import('@/static/icons/chevronLeft.svg?inline'),
+  },
   data() {
     return {
-      nameRef: 'modal-add-product-to-cart',
-      productToAdd: {},
-      quantity: 1,
+      nameRef: 'modal-actions-edit-product',
+      productToEdit: {},
       selectedIngredients: [],
       meatTerm: '',
     }
   },
-  components: {
-    ChevronRightIcon: () => import('@/static/icons/chevronRight.svg?inline'),
-    ChevronLeftIcon: () => import('@/static/icons/chevronLeft.svg?inline'),
-    CollapseContent,
-    ModalAddProductToOrder,
-  },
-  watch: {
-    product() {
-      this.selectedIngredients = this.product.selected_ingredients || []
-    },
+  mounted() {
+    this.getNewProduct()
   },
   methods: {
-    resetData() {
-      this.quantity = 1
-      // this.selectedIngredients = []
-      this.meatTerm = ''
-    },
     open() {
       this.$refs[`component-${this.nameRef}`].open()
-      this.resetData()
-      // console.log(this.product)
-      // console.log(this.product.selectedIngredients)
-      // this.selectedIngredients = this.product.selected_ingredients || []
     },
     close() {
       this.$refs[`component-${this.nameRef}`].closeByButton()
     },
-    showModalAddProduct() {
-      this.$refs['modal-add-product-to-order'].open()
+    getNewProduct() {
+      this.productToEdit = { ...this.product }
+      this.selectedIngredients = this.product.ingredients_selected
+      this.meatTerm = this.product.comments
     },
-    addToCart() {
-      const productToAdd = {
-        product: this.product.id,
-        ...(this.selectedIngredients.length > 0 && {
-          ids_selected_ingredients: this.selectedIngredients.map(
-            (ingredient) => ingredient.id
-          ),
-        }),
-        ...(this.meatTerm && { comments: this.meatTerm }),
+    productEdit() {
+      const ingredientsText = getPrettyIngredients(this.selectedIngredients)
+      console.log(ingredientsText)
+
+      const product = {
+        ...this.productToEdit,
+        ingredients_selected: this.selectedIngredients,
+        ingredients_selected_text: ingredientsText,
+        comments: this.meatTerm,
       }
-
-      const cartStore = JSON.parse(localStorage.getItem('cart'))
-
-      if (!cartStore) {
-        const cart = [
-          {
-            waiter: this.$auth.user.id,
-            cart: [productToAdd],
-          },
-        ]
-        localStorage.setItem('cart', JSON.stringify(cart))
-      } else {
-        const index = this.findCartByUser(cartStore)
-
-        if (index >= cartStore.length) {
-          cartStore[index] = {
-            waiter: this.$auth.user.id,
-            cart: [productToAdd],
-          }
-        } else {
-          cartStore[index].cart.push(productToAdd)
-        }
-
-        localStorage.setItem('cart', JSON.stringify(cartStore))
-      }
+      this.$emit('updateProduct', product)
     },
-    findCartByUser(cart) {
-      if (cart) {
-        const index = cart.findIndex(
-          (item) => item.waiter === this.$auth.user.id
-        )
-        return index < 0 ? cart.length - 1 : index
-      }
-      return 0
+  },
+  watch: {
+    product() {
+      this.getNewProduct()
     },
   },
   computed: {
-    productToSaved() {
-      return {
-        ...this.product,
-        ingredients_selected:
-          this.selectedIngredients.length > 0
-            ? this.selectedIngredients
-            : this.product.selected_ingredients,
-        ...(this.meatTerm && { comments: this.meatTerm }),
-      }
-    },
     checkedAll() {
       return (
         this.selectedIngredients.length ===
@@ -273,7 +211,7 @@ export default {
 }
 </script>
 
-<style scoped lang="postcss">
+<style lang="postcss" scoped>
 #meat-term-content label {
   @apply cursor-pointer;
 }

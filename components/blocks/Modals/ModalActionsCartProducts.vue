@@ -12,11 +12,11 @@
           variant="outline-primary"
           size="block"
           class="mb-4"
-          @click="changeView()"
+          @click="editProduct()"
         >
           Editar producto
         </Button>
-        <Button variant="danger" size="block" @click="changeView()">
+        <Button variant="danger" size="block" @click="deleteProduct()">
           Eliminar producto
         </Button>
       </div>
@@ -24,10 +24,17 @@
 
       <div key="3" v-else-if="option === 'new-order'"></div>
     </TransitionGroup>
+    <ModalActionsEditProduct
+      ref="component-modal-actions-edit-product"
+      :product="product"
+      @updateProduct="updateProduct"
+    ></ModalActionsEditProduct>
   </Modal>
 </template>
 
 <script>
+import ModalActionsEditProduct from './ModalActionsEditProduct.vue'
+
 export default {
   name: 'ModalActionsCartProducts',
   props: {
@@ -37,6 +44,14 @@ export default {
     },
     product: {
       type: Object,
+      required: true,
+    },
+    indexOrder: {
+      type: Number,
+      required: true,
+    },
+    indexProduct: {
+      type: Number,
       required: true,
     },
   },
@@ -53,8 +68,36 @@ export default {
     close() {
       this.$refs[`component-${this.nameRef}`].closeByButton()
     },
-    changeView() {},
+    editProduct() {
+      this.$refs['component-modal-actions-edit-product'].open()
+    },
+    deleteProduct() {
+      this.$emit('deleteProduct', {
+        order: this.order,
+        product: this.product,
+        indexOrder: this.indexOrder,
+        indexProduct: this.indexProduct,
+      })
+    },
+    updateProduct({
+      comments,
+      ingredients_selected,
+      ingredients_selected_text,
+    }) {
+      this.$emit('updateProduct', {
+        order: this.order,
+        product: {
+          ...this.product,
+          comments,
+          ingredients_selected,
+          ingredients_selected_text,
+        },
+        indexOrder: this.indexOrder,
+        indexProduct: this.indexProduct,
+      })
+    },
   },
+  components: { ModalActionsEditProduct },
 }
 </script>
 

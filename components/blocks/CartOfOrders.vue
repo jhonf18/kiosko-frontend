@@ -14,7 +14,7 @@
       <div
         v-for="(product, index) in order.products"
         :key="`${index}-${product.id}`"
-        @click="openModalActions(order, product)"
+        @click="openModalActions(order, product, i, index)"
         class="mb-2 cursor-pointer hover:bg-gray-100 px-2 pb-2"
       >
         <hr />
@@ -48,14 +48,14 @@
           >
             Enviar pedido
           </Button>
-          <Button
+          <!-- <Button
             variant="outline-primary"
             size="md"
             class="mr-2"
             @click="addProductToOrder(i)"
           >
             Agregar producto
-          </Button>
+          </Button> -->
           <Button variant="outline-danger" size="md" @click="deleteOrder(i)">
             Eliminar pedido
           </Button>
@@ -72,7 +72,11 @@
     <ModalActionsCartProducts
       :order="orderSelected"
       :product="productSelected"
+      :indexProduct="indexProduct"
+      :indexOrder="indexOrder"
       ref="modal-actions-products"
+      @deleteProduct="deleteProduct"
+      @updateProduct="updateProduct"
     ></ModalActionsCartProducts>
   </div>
 </template>
@@ -96,6 +100,8 @@ export default {
       orderSelected: {},
       productSelected: {},
       key: 1,
+      indexProduct: -1,
+      indexOrder: -1,
     }
   },
   mounted() {
@@ -105,7 +111,9 @@ export default {
     findOrders() {
       const orders = JSON.parse(localStorage.getItem('cart'))
       if (orders) {
-        this.orders = orders
+        this.orders = orders.filter(
+          (order) => order.waiter === this.$auth.user.id
+        )
       }
     },
     updateOrders() {
@@ -113,11 +121,35 @@ export default {
     },
     addProductToOrder() {},
     sendOrder() {},
-    deleteOrder() {},
-    openModalActions(order, product) {
+    deleteOrder(indexOrder) {
+      const orders = JSON.parse(localStorage.getItem('cart'))
+      orders.splice(indexOrder, 1)
+      localStorage.setItem('cart', JSON.stringify(orders))
+      this.findOrders()
+      this.key++
+    },
+    openModalActions(order, product, indexOrder, indexProduct) {
       this.orderSelected = order
       this.productSelected = product
+      this.indexOrder = indexOrder
+      this.indexProduct = indexProduct
       this.$refs['modal-actions-products'].open()
+    },
+    deleteProduct({ product, indexOrder, indexProduct }) {
+      const orders = JSON.parse(localStorage.getItem('cart'))
+
+      orders[indexOrder].products.splice(indexProduct, 1)
+      orders[indexOrder].total = orders[indexOrder].total - product.price
+      localStorage.setItem('cart', JSON.stringify(orders))
+      this.findOrders()
+      this.key++
+    },
+    updateProduct({ product, indexOrder, indexProduct }) {
+      const orders = JSON.parse(localStorage.getItem('cart'))
+      orders[indexOrder].products[indexProduct] = product
+      localStorage.setItem('cart', JSON.stringify(orders))
+      this.findOrders()
+      this.key++
     },
   },
   watch: {
