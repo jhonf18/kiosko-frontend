@@ -1,15 +1,13 @@
 <template>
   <div>
     <div v-for="order in orders" :key="order.id">
+      <strong>
+        {{ order.name }}
+      </strong>
       {{ order.total_price }}
-      {{ order.is_open }}
-      <ul v-if="order.custom_product && order.custom_product.length > 0">
-        <li v-for="(product, index) in order.custom_product" :key="index">
-          <strong>nombre: </strong> {{ product.name }} <strong>precio: </strong> {{ product.price }}
-        </li>
-      </ul>
       <br />
       <button @click="finishOder(order.id)">Finalizar pedido</button>
+      <hr />
     </div>
   </div>
 </template>
@@ -18,34 +16,34 @@
 export default {
   data() {
     return {
-      orders: []
-    };
+      orders: [],
+    }
   },
   mounted() {
     this.socket = this.$nuxtSocket({
-      name: 'main'
-    });
+      name: 'main',
+    })
 
     this.socket.emit('authentication', {
       token:
-        'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxNmM2YTUyNS02MDc5LTQzYzEtOGNjZi0xNjNmYTkxNGM5NzMiLCJpZCI6IjJlMTg3MmU4LTU5M2MtNDllMy1iNjgxLTYyY2M2ZjZiYjYyNyIsImlkX2JyYW5jaF9vZmZpY2UiOiJlZjU1MzU4Yi0zOTI2LTQ2YTYtYThhZS01ZDlhOTA3ZjAxY2MiLCJpYXQiOjE2NzgyMTk4NzcsImV4cCI6MTY3ODI4NDY3NywiYXVkIjoia2lvc2tvIn0.BYeOT6CppPck_XEcOHEC4jKCuNZ8WG_xl-2GY-xg8GHmjBC7ShBwWgzCHkfX_jo34FuDr3AdzOqI9e-LsnoXxA'
-    });
+        'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMzgxMTVlNi1jYjQ4LTRjNTktYTQ3ZC04YWZkNjYwNjcyZDUiLCJpZCI6Ijc1OTVmYjU0LWE0OTktNGEyNi05YjkzLWQ1YjE5ZmNhMmQ5NCIsImlkX2JyYW5jaF9vZmZpY2UiOiJlZjU1MzU4Yi0zOTI2LTQ2YTYtYThhZS01ZDlhOTA3ZjAxY2MiLCJpYXQiOjE2ODU5MjI0ODksImV4cCI6MTY4NTk4NzI4OSwiYXVkIjoia2lvc2tvIn0.Oj4jXJwxX6uDl-IplwZsewYBYaX4CcmJpAF7efhQm_LJtSOkk2PBJJvjfFj_jz-XGo9Qr-baP06rR2wO2m8Wuw',
+    })
 
     this.socket.on('authenticated', () => {
-      this.socket.on('new-order', order => {
-        this.orders.push(order);
-      });
-    });
+      this.socket.on('new-order', (order) => {
+        this.orders.push(order)
+      })
+    })
 
-    this.socket.on('unauthorized', err => {
-      this.onError = err.message;
-    });
+    this.socket.on('unauthorized', (err) => {
+      this.onError = err.message
+    })
   },
   methods: {
     finishOrder(orderID) {
       //Fetch finish order
-      this.socket.emit('');
-    }
-  }
-};
+      this.socket.emit('')
+    },
+  },
+}
 </script>

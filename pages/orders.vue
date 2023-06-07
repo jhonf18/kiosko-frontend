@@ -25,17 +25,26 @@
         ></ProductsCarousel>
       </template>
       <template v-slot:menu-content-2="{ active }">
-        <CartOfOrders :active="active"></CartOfOrders>
+        <CartOfOrders
+          :active="active"
+          @emitSocket="emitEventsOfSockets"
+        ></CartOfOrders>
       </template>
-      <template v-slot:menu-content-3> tab 3 </template>
+      <template v-slot:menu-content-3="{ active }">
+        <OrdersView :active="active" ref="order-views-component"></OrdersView>
+      </template>
     </BottomTabs>
   </div>
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
+import { generalStoreNames } from '~/store/general'
+
 import BottomTabs from '~/components/blocks/BottomTabs.vue'
 import CartOfOrders from '~/components/blocks/CartOfOrders.vue'
 import CategoriesBanner from '~/components/blocks/CategoriesBanner.vue'
+import OrdersView from '~/components/blocks/OrdersView.vue'
 import ProductsCarousel from '~/components/blocks/ProductsCarousel.vue'
 
 const headerTabs = [
@@ -63,6 +72,7 @@ export default {
         },
       ],
       category: null,
+      socket: null,
     }
   },
   components: {
@@ -77,11 +87,18 @@ export default {
     ProductsCarousel,
     CategoriesBanner,
     CartOfOrders,
+    OrdersView,
   },
   created() {
     this.getProducts()
   },
+  mounted() {
+    this.openSocketConnection()
+  },
   methods: {
+    ...mapMutations({
+      showToast: generalStoreNames.mutations.showToast,
+    }),
     categorySelected(category) {
       this.category = category
     },
@@ -90,13 +107,81 @@ export default {
         const products = await this.$productRepository.index({
           getData:
             'name,price,id,category,subcategory,passage_sections,media_files,branch_office.id,branch_office.name,branch_office.address,selected_ingredients.id,selected_ingredients.name,selected_ingredients.type',
+          filter: `branch_office=${this.$auth.user.branch_office}`,
         })
         this.products = products
-        console.log(products)
-        // commit(localStoreNames.mutations.set, products)
       } catch (err) {
+        // TODO: Manejar el error
         console.log(err)
       }
+    },
+    openSocketConnection() {
+      const TOKEN = localStorage.getItem('auth._token.local').split(' ')[1]
+      this.socket = this.$nuxtSocket({
+        name: 'main',
+        auth: {
+          token: TOKEN,
+        },
+      })
+
+      this.socket.emit('authentication', {
+        token: TOKEN,
+      })
+
+      this.socket.on('authenticated', () => {
+        // TODO: Change face
+        this.socket.on('kitchen:accepted-order', ({ order, ticket }) => {
+          this.showToast({
+            text: `Preparando ${ticket.product.name} para ${order.name}`,
+            type: 'warning',
+          })
+          this.$refs['order-views-component'].changeStatusOfTicket('accepted', {
+            order,
+            ticket,
+          })
+        })
+        this.socket.on('oven:accepted-order', ({ order, ticket }) => {
+          this.showToast({
+            text: `Preparando ${ticket.product.name} para ${order.name}`,
+            type: 'warning',
+          })
+          this.$refs['order-views-component'].changeStatusOfTicket('accepted', {
+            order,
+            ticket,
+          })
+        })
+
+        this.socket.on('kitchen:finished-order', ({ order, ticket }) => {
+          this.showToast({
+            text: `Ha terminado la preparación de ${ticket.product.name} para ${order.name}`,
+            type: 'success',
+          })
+          this.$refs['order-views-component'].changeStatusOfTicket('finished', {
+            order,
+            ticket,
+          })
+        })
+        this.socket.on('oven:finished-order', ({ order, ticket }) => {
+          this.showToast({
+            text: `Ha terminado la preparación de ${ticket.product.name} para ${order.name}`,
+            type: 'success',
+          })
+          this.$refs['order-views-component'].changeStatusOfTicket('finished', {
+            order,
+            ticket,
+          })
+        })
+      })
+
+      this.socket.on('unauthorized', (err) => {
+        console.log(err)
+        this.onError = err.message
+      })
+    },
+    emitEventsOfSockets(data) {
+      let dataToSend = { ...data }
+      delete dataToSend.name
+      this.socket.emit(data.name, dataToSend)
     },
   },
 }

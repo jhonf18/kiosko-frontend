@@ -1,6 +1,6 @@
 <template>
   <div class="px-8 py-6" :key="key">
-    <h2 class="text-2xl font-bold mb-4">Pedidos por confirmar</h2>
+    <h2 class="text-2xl font-bold mb-4">Pedidos por enviar</h2>
     <CollapseContent
       :withShadow="true"
       v-for="(order, i) in orders"
@@ -83,6 +83,8 @@
 
 <script>
 import ModalActionsCartProducts from '@/components/blocks/Modals/ModalActionsCartProducts.vue'
+import { mapMutations } from 'vuex'
+import { generalStoreNames } from '~/store/general'
 export default {
   name: 'CartOfOrders',
   props: {
@@ -102,12 +104,17 @@ export default {
       key: 1,
       indexProduct: -1,
       indexOrder: -1,
+      socket: null,
     }
   },
   mounted() {
     this.updateOrders()
+    // this.openSocketConnection()
   },
   methods: {
+    ...mapMutations({
+      showToast: generalStoreNames.mutations.showToast,
+    }),
     findOrders() {
       const orders = JSON.parse(localStorage.getItem('cart'))
       if (orders) {
@@ -119,8 +126,45 @@ export default {
     updateOrders() {
       this.findOrders()
     },
-    addProductToOrder() {},
-    sendOrder() {},
+    async sendOrder(index) {
+      const order = this.orders[index]
+
+      const orderToSend = {}
+      orderToSend.total_price = order.total
+      orderToSend.name = order.name
+      orderToSend.selected_products = order.products.map((product) => {
+        return {
+          product: product.id,
+          ids_selected_ingredients: product.ingredients_selected.map(
+            (ingredient) => ingredient.id
+          ),
+          comments: product.comments,
+        }
+      })
+
+      let response = null
+
+      try {
+        response = await this.$orderRepository.create(orderToSend)
+      } catch (err) {
+        // TODO: Manejar el error
+        console.log(err)
+      }
+
+      if (response) {
+        this.$emit('emitSocket', {
+          name: 'create-order',
+          order: response.order,
+          tickets: response.tickets.map((ticket) => {
+            ticket.order = response.order
+            return ticket
+          }),
+        })
+        // this.socket.emit('create-order', )
+
+        this.deleteOrder(index)
+      }
+    },
     deleteOrder(indexOrder) {
       const orders = JSON.parse(localStorage.getItem('cart'))
       orders.splice(indexOrder, 1)
