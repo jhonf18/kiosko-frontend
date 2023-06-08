@@ -1,7 +1,7 @@
 <template>
   <Modal
-    :id="`component-${nameRef}`"
-    :ref="`component-${nameRef}`"
+    :id="`${nameRef}`"
+    :ref="`${nameRef}`"
     size="sm"
     title="Acciones"
     :footer="false"
@@ -26,7 +26,7 @@
       </Button>
     </div>
     <ModalActionsEditProduct
-      ref="component-modal-actions-edit-product"
+      ref="component-modal-actions-edit-product-in-order-views"
       :product="product"
       @updateProduct="updateProduct"
     ></ModalActionsEditProduct>
@@ -37,7 +37,7 @@
 import ModalActionsEditProduct from './ModalActionsEditProduct.vue'
 
 export default {
-  name: 'ModalActionsCartProducts',
+  name: 'ModalActionsOrderViews',
   props: {
     order: {
       type: Object,
@@ -58,19 +58,19 @@ export default {
   },
   data() {
     return {
-      nameRef: 'modal-actions-cart-products',
+      nameRef: 'component-modal-actions-order-views',
       option: 'select-action',
     }
   },
   methods: {
     open() {
-      this.$refs[`component-${this.nameRef}`].open()
+      this.$refs[`${this.nameRef}`].open()
     },
     close() {
-      this.$refs[`component-${this.nameRef}`].closeByButton()
+      this.$refs[`${this.nameRef}`].closeByButton()
     },
     editProduct() {
-      this.$refs['component-modal-actions-edit-product'].open()
+      this.$refs['component-modal-actions-edit-product-in-order-views'].open()
     },
     deleteProduct() {
       this.$emit('deleteProduct', {
@@ -85,13 +85,16 @@ export default {
       ingredients_selected,
       ingredients_selected_text,
     }) {
+      const commentID = this.product.comments_id
       this.$emit('updateProduct', {
         order: this.order,
         product: {
           ...this.product,
-          comments,
+          comments: `${commentID}::${comments}`,
+          comments_text: comments,
+          ingredients: ingredients_selected,
           ingredients_selected,
-          ingredients_selected_text,
+          ingredients_text: ingredients_selected_text,
         },
         indexOrder: this.indexOrder,
         indexProduct: this.indexProduct,

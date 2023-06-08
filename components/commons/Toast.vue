@@ -12,6 +12,10 @@
           v-else-if="toastContent.type === 'warning'"
           class="face"
         />
+        <FaceNormal
+          v-else-if="toastContent.type === 'default'"
+          class="face"
+        ></FaceNormal>
       </div>
       <span class="mr-2 text-sm w-56 max-w-56" v-if="!toast.show">
         <slot></slot>
@@ -43,6 +47,7 @@ export default {
     FaceSad: () => import('@/static/icons/face-sad.svg?inline'),
     FaceHappy: () => import('@/static/icons/face-happy.svg?inline'),
     FaceConfuzed: () => import('@/static/icons/face-confuzed.svg?inline'),
+    FaceNormal: () => import('@/static/icons/face-normal.svg?inline'),
     CloseIcon: () => import('@/static/icons/x.svg?inline'),
   },
   props: {
@@ -147,6 +152,9 @@ export default {
   @apply bg-yellow-500;
 }
 
+.toast-default .content::before {
+  @apply bg-primary-light;
+}
 .face {
   @apply stroke-current;
 }
@@ -161,6 +169,10 @@ export default {
 
 .toast-warning .face {
   @apply text-yellow-500;
+}
+
+.toast-default .face {
+  @apply text-primary;
 }
 
 .button-close {

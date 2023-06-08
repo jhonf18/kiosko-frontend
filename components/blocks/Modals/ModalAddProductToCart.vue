@@ -139,6 +139,17 @@
         </label>
       </div>
 
+      <div>
+        <Input
+          idInput="comment-for-product"
+          placeholder="Comentarios"
+          type="text"
+          class="mb-4"
+          label="Añade un comentario"
+          v-model="comments"
+        ></Input>
+      </div>
+
       <Button
         variant="primary"
         size="block"
@@ -174,6 +185,7 @@ export default {
       quantity: 1,
       selectedIngredients: [],
       meatTerm: '',
+      comments: '',
     }
   },
   components: {
@@ -196,9 +208,6 @@ export default {
     open() {
       this.$refs[`component-${this.nameRef}`].open()
       this.resetData()
-      // console.log(this.product)
-      // console.log(this.product.selectedIngredients)
-      // this.selectedIngredients = this.product.selected_ingredients || []
     },
     close() {
       this.$refs[`component-${this.nameRef}`].closeByButton()
@@ -214,7 +223,9 @@ export default {
             (ingredient) => ingredient.id
           ),
         }),
-        ...(this.meatTerm && { comments: this.meatTerm }),
+        ...(this.meatTerm && {
+          comments: `${this.meatTerm}--${this.comments}`,
+        }),
       }
 
       const cartStore = JSON.parse(localStorage.getItem('cart'))
@@ -260,7 +271,10 @@ export default {
           this.selectedIngredients.length > 0
             ? this.selectedIngredients
             : this.product.selected_ingredients,
-        ...(this.meatTerm && { comments: this.meatTerm }),
+        ...(this.meatTerm && {
+          comments: `${this.meatTerm}--${this.comments}`,
+        }),
+        quantity: this.quantity,
       }
     },
     checkedAll() {

@@ -3,13 +3,20 @@
     <h2 class="text-3xl font-bold mb-5">{{ title }}</h2>
     <article v-for="ticket in tickets" :key="ticket.id" class="mb-4">
       {{ ticket.order.name }} <br />
-      <strong>Productos: </strong> {{ ticket.product.ingredients_text }} <br />
-      <Button size="sm" variant="success" @click="acceptTicket(ticket)"
-        >Aceptar</Button
-      >
-      <Button size="sm" variant="primary" @click="finishTicket(ticket)"
-        >Finalizado</Button
-      >
+      <strong>Comentarios:</strong> {{ ticket.comments }} <br />
+      <strong>Nombre:</strong> {{ ticket.product.name }} <br />
+      <strong>Ingredientes: </strong> {{ ticket.product.ingredients_text }}
+      <br />
+      <br />
+      <div class="mb-4">
+        <Button size="sm" variant="success" @click="acceptTicket(ticket)"
+          >Aceptar</Button
+        >
+        <Button size="sm" variant="primary" @click="finishTicket(ticket)"
+          >Finalizado</Button
+        >
+      </div>
+      <hr />
     </article>
   </div>
 </template>
@@ -58,6 +65,21 @@ export default {
             .forEach((ticket) => {
               this.tickets.unshift(ticket)
             })
+        })
+
+        this.socket.on('update-order', (ticket) => {
+          console.log('update')
+          const indexTicket = this.tickets.findIndex((t) => t.id === ticket.id)
+
+          ticket.product.ingredients_text = getPrettyIngredients(
+            ticket.product.ingredients
+          )
+
+          if (indexTicket !== -1) {
+            this.$set(this.tickets, indexTicket, ticket)
+          } else {
+            this.tickets.unshift(ticket)
+          }
         })
       })
 

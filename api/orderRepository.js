@@ -28,11 +28,27 @@ export const orderRepository = ($axios) => ({
     })
   },
 
-  update(id, payload) {
+  addProductToOrder(id, payload) {
     return new Promise(async (resolve, reject) => {
       try {
         const result = await $axios.$put(
-          `/back-office/products-managment/update-product/${id}`,
+          `/managment-orders/orders/add-products-to-order/${id}`,
+          payload
+        )
+        resolve(result.data)
+      } catch (err) {
+        if (err.response && err.response.data) {
+          reject(err.response.data.error)
+        }
+      }
+    })
+  },
+
+  updateCommentsOrIngredientsOfProduct(id, payload) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const result = await $axios.$put(
+          `/managment-orders/orders/update-comments-or-ingredients-of-product/${id}`,
           payload
         )
         resolve(result.data)
@@ -48,7 +64,7 @@ export const orderRepository = ($axios) => ({
     return new Promise(async (resolve, reject) => {
       try {
         const result = await $axios.$delete(
-          `managment-orders/orders/delete-order/${id}`
+          `/managment-orders/orders/delete-order/${id}`
         )
         resolve(result.data)
       } catch (err) {

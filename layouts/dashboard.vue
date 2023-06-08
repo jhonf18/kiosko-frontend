@@ -18,7 +18,7 @@
             </button>
             <LogotypeNav></LogotypeNav>
           </div>
-          <div class="flex items-center ml-3 relative">
+          <div class="flex items-center ml-3 relative" v-if="$auth.user">
             <button
               type="button"
               class="flex text-sm rounded-full focus:ring-4 focus:ring-gray-300"
@@ -27,6 +27,7 @@
             >
               <span class="sr-only">Abrir menu de usuario</span>
               <span
+                v-if="$auth.user.name"
                 ref="dropdown-button-profile"
                 class="w-9 h-9 rounded-full flex-none bg-primary-dark flex items-center justify-center font-semibold text-white text-center"
               >

@@ -46,6 +46,7 @@ export default {
   },
   methods: {
     toggleTabs: function (tabNumber) {
+      this.$emit('toggleTabs', tabNumber)
       this.openTab = tabNumber
     },
   },

@@ -113,7 +113,7 @@ export default {
   },
   data() {
     return {
-      carouselKey: 1,
+      carouselKey: new Date().getTime(),
       settings: {
         centerMode: true,
         focusOnSelect: false,
@@ -165,7 +165,7 @@ export default {
       })
 
       this.subcategories[index].active = true
-      this.carouselKey += 1
+      this.carouselKey = new Date.getTime()
     },
     move(to) {
       if (to === 'prev') {
@@ -193,7 +193,7 @@ export default {
           }
         )
       }
-      this.carouselKey += 1
+      this.carouselKey = new Date().getTime()
     },
   },
   watch: {

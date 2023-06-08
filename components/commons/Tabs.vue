@@ -1,6 +1,6 @@
 <template>
-  <div class="mx-6">
-    <div class="mt-8">
+  <div>
+    <div>
       <ul class="flex">
         <li
           v-for="tab in tabs"
@@ -8,7 +8,12 @@
           :class="{ 'is-active': tab.isActive }"
         >
           <a
-            class="border border-primary rounded-lg px-2.5 py-2 font-semibold hover:bg-primary hover:border-primary transition-colors duration-150 hover:text-white"
+            class="border border-primary rounded-lg font-semibold hover:bg-primary hover:border-primary transition-colors duration-150 hover:text-white"
+            :class="{
+              'px-1.5 py-1.5 text-sm': tab.size === 'sm',
+              'px-2 py-1.5': tab.size === 'md',
+              'px-2.5 py-2': tab.size === 'lg',
+            }"
             :href="tab.href"
             @click="selectTab(tab)"
           >

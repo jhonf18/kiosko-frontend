@@ -1,19 +1,23 @@
 <template>
   <div>
-    <BottomTabs>
+    <BottomTabs @toggleTabs="toggleBottomTabs">
       <template v-for="tab in headerTabs" v-slot:[tab.slotName]="{ active }">
         <a
           target="#"
           class="flex items-center justify-center h-full leading-normal cursor-pointer"
         >
           <span
-            class="text-primary h-full flex items-center justify-center py-4 w-10 rounded-t-sm transition-all duration-150"
+            class="text-primary h-full flex items-center justify-center py-4 w-10 rounded-t-sm transition-all duration-150 relative"
             :class="{ 'border-t-2 border-primary': active }"
           >
             <component
               :is="active ? tab.activeIcon : tab.icon"
               class="w-7 h-7"
             ></component>
+            <div
+              v-if="!active && tab.hasNotification"
+              class="absolute w-2 h-2 rounded-full bg-primary top-2.5 right-1.5"
+            ></div>
           </span>
         </a>
       </template>
@@ -31,7 +35,11 @@
         ></CartOfOrders>
       </template>
       <template v-slot:menu-content-3="{ active }">
-        <OrdersView :active="active" ref="order-views-component"></OrdersView>
+        <OrdersView
+          :active="active"
+          ref="order-views-component"
+          @emitSocket="emitEventsOfSockets"
+        ></OrdersView>
       </template>
     </BottomTabs>
   </div>
@@ -48,16 +56,23 @@ import OrdersView from '~/components/blocks/OrdersView.vue'
 import ProductsCarousel from '~/components/blocks/ProductsCarousel.vue'
 
 const headerTabs = [
-  { icon: 'HomeIcon', activeIcon: 'HomeSolidIcon', slotName: 'menu-header-1' },
+  {
+    icon: 'HomeIcon',
+    activeIcon: 'HomeSolidIcon',
+    slotName: 'menu-header-1',
+    hasNotification: false,
+  },
   {
     icon: 'ShoppingCartIcon',
     activeIcon: 'ShoppingCartSolidIcon',
     slotName: 'menu-header-2',
+    hasNotification: false,
   },
   {
     icon: 'TicketIcon',
     activeIcon: 'TicketSolidIcon',
     slotName: 'menu-header-3',
+    hasNotification: false,
   },
 ]
 
@@ -94,6 +109,7 @@ export default {
   },
   mounted() {
     this.openSocketConnection()
+    this.$root.$on('emitSocket', this.emitEventsOfSockets)
   },
   methods: {
     ...mapMutations({
@@ -133,22 +149,25 @@ export default {
         this.socket.on('kitchen:accepted-order', ({ order, ticket }) => {
           this.showToast({
             text: `Preparando ${ticket.product.name} para ${order.name}`,
-            type: 'warning',
+            type: 'default',
           })
           this.$refs['order-views-component'].changeStatusOfTicket('accepted', {
             order,
             ticket,
           })
+          this.headerTabs[2].hasNotification = true
         })
+
         this.socket.on('oven:accepted-order', ({ order, ticket }) => {
           this.showToast({
             text: `Preparando ${ticket.product.name} para ${order.name}`,
-            type: 'warning',
+            type: 'default',
           })
           this.$refs['order-views-component'].changeStatusOfTicket('accepted', {
             order,
             ticket,
           })
+          this.headerTabs[2].hasNotification = true
         })
 
         this.socket.on('kitchen:finished-order', ({ order, ticket }) => {
@@ -160,7 +179,9 @@ export default {
             order,
             ticket,
           })
+          this.headerTabs[2].hasNotification = true
         })
+
         this.socket.on('oven:finished-order', ({ order, ticket }) => {
           this.showToast({
             text: `Ha terminado la preparación de ${ticket.product.name} para ${order.name}`,
@@ -170,6 +191,7 @@ export default {
             order,
             ticket,
           })
+          this.headerTabs[2].hasNotification = true
         })
       })
 
@@ -182,6 +204,11 @@ export default {
       let dataToSend = { ...data }
       delete dataToSend.name
       this.socket.emit(data.name, dataToSend)
+    },
+    toggleBottomTabs(tabNumber) {
+      if (tabNumber === 3 && this.headerTabs[2].hasNotification) {
+        this.headerTabs[2].hasNotification = false
+      }
     },
   },
 }

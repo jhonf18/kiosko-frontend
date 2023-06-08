@@ -138,6 +138,17 @@
         </label>
       </div>
 
+      <div>
+        <Input
+          idInput="comment-for-product"
+          placeholder="Comentarios"
+          type="text"
+          class="mb-4"
+          label="Añade un comentario"
+          v-model="comments"
+        ></Input>
+      </div>
+
       <Button variant="primary" size="block" @click="productEdit" class="mt-4">
         Editar
       </Button>
@@ -165,6 +176,7 @@ export default {
       productToEdit: {},
       selectedIngredients: [],
       meatTerm: '',
+      comments: '',
     }
   },
   mounted() {
@@ -180,17 +192,20 @@ export default {
     getNewProduct() {
       this.productToEdit = { ...this.product }
       this.selectedIngredients = this.product.ingredients_selected
-      this.meatTerm = this.product.comments
+      const comments = this.productToEdit.comments.split('--')
+      this.meatTerm = comments[0]
+      this.comments = comments[1]
+
+      this.productToEdit.comments = comments.join('--')
     },
     productEdit() {
       const ingredientsText = getPrettyIngredients(this.selectedIngredients)
-      console.log(ingredientsText)
 
       const product = {
         ...this.productToEdit,
         ingredients_selected: this.selectedIngredients,
         ingredients_selected_text: ingredientsText,
-        comments: this.meatTerm,
+        comments: `${this.meatTerm}--${this.comments}`,
       }
       this.$emit('updateProduct', product)
     },

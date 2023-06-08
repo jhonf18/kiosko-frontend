@@ -1,5 +1,5 @@
 <template>
-  <div v-show="isActive"><slot></slot></div>
+  <div v-if="isActive"><slot></slot></div>
 </template>
 
 <script>
@@ -13,6 +13,10 @@ export default {
     selected: {
       type: Boolean,
       default: false,
+    },
+    size: {
+      type: String,
+      default: 'md',
     },
   },
   data() {

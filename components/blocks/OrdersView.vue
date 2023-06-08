@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="px-6 pt-5">
     <tabs>
-      <tab name="Abiertas" :selected="true">
+      <tab :selected="true" name="Abiertas" size="lg">
         <CollapseContent
           :withShadow="true"
           v-for="(order, i) in openOrders"
@@ -13,7 +13,7 @@
               >{{ order.name }}
               <span
                 v-if="!order.finished"
-                class="text-base text-red-700 font-bold"
+                class="text-base text-primary font-bold"
               >
                 (En proceso)
               </span>
@@ -85,7 +85,7 @@
           </div>
         </CollapseContent>
       </tab>
-      <tab name="Cerradas">
+      <tab name="Cerradas" size="lg">
         <CollapseContent
           :withShadow="true"
           v-for="(order, i) in closedOrders"
@@ -160,11 +160,21 @@
         </CollapseContent>
       </tab>
     </tabs>
+    <ModalActionsOrderViews
+      :order="orderSelected"
+      :product="productSelected"
+      :indexProduct="indexProduct"
+      :indexOrder="indexOrder"
+      ref="modal-actions-products"
+      @deleteProduct="deleteProduct"
+      @updateProduct="updateProduct"
+    ></ModalActionsOrderViews>
   </div>
 </template>
 
 <script>
 import { getPrettyIngredients } from '~/assets/utils/ingredientsFormatter'
+import ModalActionsOrderViews from './Modals/ModalActionsOrderViews.vue'
 
 export default {
   name: 'OrdersView',
@@ -181,14 +191,34 @@ export default {
     return {
       openOrders: [],
       closedOrders: [],
+      orderSelected: {},
+      productSelected: { media_files: [], ingredients_selected: [] },
+      key: 1,
+      indexProduct: -1,
+      indexOrder: -1,
     }
   },
   methods: {
+    openModalActions(order, product, indexOrder, indexProduct) {
+      this.orderSelected = order
+      this.productSelected = product
+      this.productSelected.ingredients_selected = product.ingredients
+      this.productSelected.selected_ingredients = product.all_ingredients
+      this.productSelected.ingredients_selected_text = getPrettyIngredients(
+        product.ingredients
+      )
+      const commentsArray = product.comments.split('::')
+      this.productSelected.comments = commentsArray[1]
+      this.productSelected.comments_id = commentsArray[0]
+
+      this.indexOrder = indexOrder
+      this.indexProduct = indexProduct
+      this.$refs['modal-actions-products'].open()
+    },
     async getOrders() {
       const filter = `waiter=${this.$auth.user.id}&sort_by=desc(created_at)`
       const getData =
-        'name,is_open,created_at,total_price,id,branch_office,branch_office.id,selected_products.id,selected_products.ingredients,selected_products.name,selected_products.price,selected_products.category,waiter.name'
-
+        'name,is_open,created_at,total_price,id,branch_office,branch_office.id,selected_products.id,selected_products.ingredients,selected_products.name,selected_products.price,selected_products.category,selected_products.media_files,waiter.name'
       try {
         let orders = await this.$orderRepository.index({ getData, filter })
         orders = orders.map((order) => {
@@ -196,13 +226,10 @@ export default {
           order.selected_products = order.selected_products.map((product) => {
             const ingredientsText = getPrettyIngredients(product.ingredients)
             const commentsText = product.comments.split('::')[1]
-
             const ticket = order.tickets.find(
               (ticket) => ticket.id === product.ticket_id
             )
-
             if (ticket && !ticket.date_finished) finished = false
-
             return {
               ...product,
               ingredients_text: ingredientsText,
@@ -212,10 +239,10 @@ export default {
           })
           return { ...order, finished }
         })
-
         this.openOrders = orders.filter((order) => order.is_open)
         this.closedOrders = orders.filter((order) => !order.is_open)
       } catch (err) {
+        // TODO: Handle error
         console.log(err)
       }
     },
@@ -226,11 +253,9 @@ export default {
         index = ind
         return ord.id === order.id
       })
-
       const ticketIndex = orderStore.selected_products.findIndex((product) => {
         return product.ticket_id === ticket.id
       })
-
       let ticketForUpdate = {}
       if (status === 'accepted') {
         ticketForUpdate = {
@@ -244,12 +269,10 @@ export default {
           date_finished: new Date(),
         }
       }
-
       if (orderStore.is_open) {
         this.openOrders[index].selected_products[ticketIndex].ticket =
           ticketForUpdate
       }
-
       if (this.isFinishedOrder(this.openOrders[index])) {
         this.openOrders[index].finished = true
       }
@@ -260,13 +283,50 @@ export default {
           !product.ticket || (product.ticket && product.ticket.date_finished)
         )
       })
-
       if (finished) {
         return true
       }
-
       return false
     },
+    async updateProduct({ product, indexOrder, indexProduct }) {
+      const order = this.openOrders[indexOrder]
+      const payload = {
+        product_id: product.id,
+        product_ingredients: product.ingredients_selected.map(
+          (ingredient) => ingredient.id
+        ),
+        product_comments: product.comments,
+      }
+
+      let response = null
+
+      try {
+        response =
+          await this.$orderRepository.updateCommentsOrIngredientsOfProduct(
+            order.id,
+            payload
+          )
+      } catch (err) {
+        // TODO: Handle error
+        console.log(err)
+      }
+
+      if (response) {
+        this.$set(
+          this.openOrders[indexOrder].selected_products,
+          indexProduct,
+          product
+        )
+
+        this.$emit('emitSocket', {
+          name: 'update-order',
+          ticket: { ...response.ticket, order: response.order },
+          order: response.order,
+        })
+        this.$refs['modal-actions-products'].close()
+      }
+    },
+    deleteProduct() {},
   },
   watch: {
     active() {
@@ -275,5 +335,6 @@ export default {
       }
     },
   },
+  components: { ModalActionsOrderViews },
 }
 </script>

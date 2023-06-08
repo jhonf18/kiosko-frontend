@@ -24,67 +24,139 @@
           Añadir producto a un nuevo pedido
         </Button>
       </div>
-      <div key="2" v-else-if="orderType === 'order-existing'">
-        <div class="flex mb-4" @click="orderType = 'select-type'">
+      <div key="2" v-else-if="orderType === 'order-existing'" class="pb-6">
+        <div class="flex mb-6" @click="orderType = 'select-type'">
           <ChevronLeftIcon class="cursor-pointer"></ChevronLeftIcon>
           <span class="ml-1 cursor-pointer">Ir atrás</span>
         </div>
+        <tabs>
+          <tab name="Pedidos NO enviados" :selected="true" size="sm">
+            <div class="mt-4" v-if="orders.length > 0">
+              <CollapseContent
+                :withShadow="true"
+                v-for="(order, i) in orders"
+                :key="`${i}-${order.name}`"
+                class="mb-2"
+              >
+                <template v-slot:title>
+                  <span class="text-lg font-semibold">{{ order.name }}</span>
+                </template>
 
-        <div class="mt-4">
-          <CollapseContent
-            :withShadow="true"
-            v-for="(order, i) in orders"
-            :key="`${i}-${order.name}`"
-            class="mb-2"
-          >
-            <template v-slot:title>
-              <span class="text-lg font-semibold">{{ order.name }}</span>
-            </template>
+                <div
+                  v-for="(product, index) in order.products"
+                  :key="`${index}-${product.id}`"
+                  class="mb-2"
+                >
+                  <hr />
+                  <div class="flex items-center justify-between mt-2">
+                    <h4 class="font-medium">
+                      {{ product.name }}
+                    </h4>
+                    <span class="font-semibold text-primary">
+                      {{ product.price | formatCurrency }}
+                    </span>
+                  </div>
+                  <div
+                    class="pl-2 text-gray-600 text-sm mt-4"
+                    v-if="product.ingredients_selected.length > 0"
+                  >
+                    <p>{{ product.ingredients_selected_text }}</p>
+                    <p class="mt-2" v-if="product.comments">
+                      <span class="font-semibold"> Comentarios: </span>
+                      {{ product.comments }}
+                    </p>
+                  </div>
+                </div>
+                <hr />
+                <div class="flex items-center justify-between mt-4">
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    @click="addProductToOrder(i)"
+                  >
+                    Añadir producto a aquí
+                  </Button>
 
-            <div
-              v-for="(product, index) in order.products"
-              :key="`${index}-${product.id}`"
+                  <div class="min-w-[125px] text-sm text-right">
+                    <span class="font-semibold text-primary-dark">
+                      TOTAL:
+                    </span>
+                    <span>
+                      {{ order.total | formatCurrency }}
+                    </span>
+                  </div>
+                </div>
+              </CollapseContent>
+            </div>
+            <div v-else>
+              <h4 class="font-semibold text-lg mt-5 text-center">
+                No hay pedidos sin enviar
+              </h4>
+            </div>
+          </tab>
+          <tab name="Pedidos enviados" size="sm">
+            <CollapseContent
+              v-if="sendedOrders.length > 0"
+              :withShadow="true"
+              v-for="(order, i) in sendedOrders"
+              :key="`${i}-${order.name}`"
               class="mb-2"
             >
-              <hr />
-              <div class="flex items-center justify-between mt-2">
-                <h4 class="font-medium">
-                  {{ product.name }}
-                </h4>
-                <span class="font-semibold text-primary">
-                  {{ product.price | formatCurrency }}
-                </span>
-              </div>
-              <div
-                class="pl-2 text-gray-600 text-sm mt-4"
-                v-if="product.ingredients_selected.length > 0"
-              >
-                <p>{{ product.ingredients_selected_text }}</p>
-                <p class="mt-2" v-if="product.comments">
-                  <span class="font-semibold"> Comentarios: </span>
-                  {{ product.comments }}
-                </p>
-              </div>
-            </div>
-            <hr />
-            <div class="flex items-center justify-between mt-4">
-              <Button
-                variant="outline-primary"
-                size="sm"
-                @click="addProductToOrder(i)"
-              >
-                Añadir producto a aquí
-              </Button>
+              <template v-slot:title>
+                <span class="text-lg font-semibold">{{ order.name }} </span>
+              </template>
 
-              <div class="min-w-[125px] text-sm text-right">
-                <span class="font-semibold text-primary-dark"> TOTAL: </span>
-                <span>
-                  {{ order.total | formatCurrency }}
-                </span>
+              <div
+                v-for="(product, index) in order.selected_products"
+                :key="`${index}-${product.id}`"
+                class="mb-2 cursor-pointer hover:bg-gray-100 px-2 pb-2"
+              >
+                <hr />
+                <div class="flex items-center justify-between mt-2">
+                  <h4 class="font-medium">
+                    {{ product.name }}
+                  </h4>
+                  <span class="font-semibold text-primary">
+                    {{ product.price | formatCurrency }}
+                  </span>
+                </div>
+                <div
+                  class="pl-2 text-gray-600 text-sm mt-3"
+                  v-if="product.ingredients.length > 0"
+                >
+                  <p>{{ product.ingredients_text }}</p>
+                  <p class="mt-2" v-if="product.comments_text">
+                    <span class="font-semibold"> Comentarios: </span>
+                    {{ product.comments_text }}
+                  </p>
+                </div>
               </div>
+              <hr />
+              <div class="flex items-center justify-end mt-6 mb-4">
+                <div>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    @click="addProductToSendedOrder(order, i)"
+                  >
+                    Añadir producto a aquí
+                  </Button>
+                </div>
+                <div class="min-w-[215px] text-right">
+                  <span class="font-semibold text-primary-dark"> TOTAL: </span>
+                  <span>
+                    {{ order.total_price | formatCurrency }}
+                  </span>
+                </div>
+              </div>
+            </CollapseContent>
+            <div v-if="sendedOrders.length === 0">
+              <h4 class="font-semibold text-lg mt-5 text-center">
+                No hay pedidos enviados
+              </h4>
             </div>
-          </CollapseContent>
-        </div>
+          </tab>
+        </tabs>
       </div>
 
       <div key="3" v-else-if="orderType === 'new-order'">
@@ -127,6 +199,7 @@ export default {
       orderType: 'select-type',
       orderName: '',
       orders: [],
+      sendedOrders: [],
     }
   },
   components: {
@@ -147,6 +220,7 @@ export default {
         this.orders = JSON.parse(localStorage.getItem('cart')).filter(
           (order) => order.waiter === this.$auth.user.id
         )
+        this.getOrders()
       }
     },
     addProductToOrder(index) {
@@ -156,8 +230,13 @@ export default {
         product.ingredients_selected
       )
 
-      cartStore[index].products.unshift(product)
-      cartStore[index].total += product.price
+      for (let i = 0; i < product.quantity; i++) {
+        cartStore[index].products.unshift(product)
+        cartStore[index].total += product.price
+      }
+
+      // cartStore[index].products.unshift(product)
+      // cartStore[index].total += product.price
 
       localStorage.setItem('cart', JSON.stringify(cartStore))
       this.close()
@@ -181,6 +260,14 @@ export default {
         hour12: false,
       }
 
+      let products = []
+      let totalPrice = 0
+
+      for (let i = 0; i < product.quantity; i++) {
+        products.unshift(product)
+        totalPrice += product.price
+      }
+
       const cart = [
         {
           name: `${this.orderName} - ${new Intl.DateTimeFormat(
@@ -188,8 +275,8 @@ export default {
             options
           ).format(new Date())}`,
           waiter: this.$auth.user.id,
-          products: [product],
-          total: product.price,
+          products,
+          total: totalPrice,
         },
       ]
 
@@ -202,6 +289,78 @@ export default {
 
       this.close()
       this.$emit('finished', true)
+    },
+    async getOrders() {
+      const filter = `waiter=${this.$auth.user.id}&sort_by=desc(created_at)&is_open=true`
+      const getData =
+        'name,is_open,created_at,total_price,id,branch_office,branch_office.id,selected_products.id,selected_products.ingredients,selected_products.name,selected_products.price,selected_products.category,waiter.name'
+
+      try {
+        let orders = await this.$orderRepository.index({ getData, filter })
+        orders = orders.map((order) => {
+          let finished = true
+          order.selected_products = order.selected_products.map((product) => {
+            const ingredientsText = getPrettyIngredients(product.ingredients)
+            const commentsText = product.comments.split('::')[1]
+
+            const ticket = order.tickets.find(
+              (ticket) => ticket.id === product.ticket_id
+            )
+
+            if (ticket && !ticket.date_finished) finished = false
+
+            return {
+              ...product,
+              ingredients_text: ingredientsText,
+              comments_text: commentsText,
+              ...(ticket && { ticket }),
+            }
+          })
+          return { ...order, finished }
+        })
+
+        this.sendedOrders = orders
+      } catch (err) {
+        // TODO: Handle error
+        console.log(err)
+      }
+    },
+    async addProductToSendedOrder(order, index) {
+      let productToAdd = {}
+      productToAdd.selected_products = [
+        {
+          product: this.product.id,
+          ids_selected_ingredients: this.product.ingredients_selected.map(
+            (ingredient) => ingredient.id
+          ),
+          comments: this.product.comments,
+        },
+      ]
+
+      let response = null
+
+      try {
+        response = await this.$orderRepository.addProductToOrder(
+          order.id,
+          productToAdd
+        )
+      } catch (err) {
+        // TODO: Manejar el error
+        console.log(err)
+      }
+
+      if (response) {
+        this.$root.$emit('emitSocket', {
+          name: 'create-order',
+          order: response.order,
+          tickets: response.tickets.map((ticket) => {
+            ticket.order = response.order
+            return ticket
+          }),
+        })
+        this.close()
+        this.$emit('finished', true)
+      }
     },
   },
 }
