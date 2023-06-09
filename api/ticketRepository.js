@@ -16,7 +16,7 @@ export const ticketRepository = ($axios) => ({
     return new Promise(async (resolve, reject) => {
       try {
         const result = await $axios.$put(
-          `managment-orders/tickets/change-status-ticket/${id}`,
+          `/managment-orders/tickets/change-status-ticket/${id}`,
           payload
         )
         resolve(result.data)

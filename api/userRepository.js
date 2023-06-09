@@ -103,4 +103,18 @@ export const userRepository = ($axios) => ({
         })
     })
   },
+  getAll({ getData = '', filter = '' }) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const result = await $axios.$get(
+          `/back-office/user-managment/users?get=${getData}&${filter}`
+        )
+        resolve(result.data)
+      } catch (err) {
+        if (err.response && err.response.data) {
+          reject(err.response.data.error)
+        }
+      }
+    })
+  },
 })

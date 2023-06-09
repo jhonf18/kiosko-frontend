@@ -176,6 +176,8 @@
 import { getPrettyIngredients } from '~/assets/utils/ingredientsFormatter'
 import ModalActionsOrderViews from './Modals/ModalActionsOrderViews.vue'
 
+// TODO: Agregar funcionalidad de eliminar producto
+
 export default {
   name: 'OrdersView',
   async mounted() {
