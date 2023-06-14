@@ -68,7 +68,6 @@ export default {
         })
 
         this.socket.on('update-order', (ticket) => {
-          console.log('update')
           const indexTicket = this.tickets.findIndex((t) => t.id === ticket.id)
 
           ticket.product.ingredients_text = getPrettyIngredients(
@@ -103,7 +102,7 @@ export default {
 
       const filter = `sort_by=desc(created_at)&sections=${section}&brach_office=${this.$auth.user.branch_office.id}`
       const getData =
-        'id,sections,product,comments,product.name,product.id,product.ingredients,order.comments,waiter.id,waiter.name,waiter.email,order.total_price,order.id,order.name'
+        'id,sections,product,comments,product.name,product.id,product.ingredients,order.comments,order.selected_products,waiter.id,waiter.name,waiter.email,order.total_price,order.id,order.name'
 
       let tickets = null
       try {
@@ -115,10 +114,16 @@ export default {
 
       if (tickets) {
         tickets = tickets.map((ticket) => {
-          const ingredientsText = getPrettyIngredients(
-            ticket.product.ingredients
-          )
-          ticket.product.ingredients_text = ingredientsText
+          if (
+            ticket.product &&
+            ticket.product.ingredients &&
+            ticket.product.ingredients.length > 0
+          ) {
+            const ingredientsText = getPrettyIngredients(
+              ticket.product.ingredients
+            )
+            ticket.product.ingredients_text = ingredientsText
+          }
           return { ...ticket }
         })
         this.tickets = tickets
@@ -141,15 +146,36 @@ export default {
         console.log(err)
       }
     },
-    finishTicket(ticket) {
+    async finishTicket(ticket) {
       try {
-        const response = this.$ticketRepository.updateStatus(ticket.id, {
+        const response = await this.$ticketRepository.updateStatus(ticket.id, {
           state: 'finished',
         })
 
         if (response) {
+          console.log(response)
+          console.log(ticket)
+          const selectedProducts = ticket.order.selected_products
+          let newSelectedProducts = []
+
+          for (const selectedProduct of selectedProducts) {
+            console.log(response.order)
+            const product = response.order.selected_products.find(
+              (lst) => lst.product._id === selectedProduct.product
+            )
+
+            console.log(product)
+            newSelectedProducts.push({
+              ...selectedProduct,
+              ticket_id: product.ticket_id,
+            })
+          }
+
           this.socket.emit(`${this.section}:finish-order`, {
-            order: ticket.order,
+            order: {
+              ...ticket.order,
+              // selected_products: newSelectedProducts,
+            },
             ticket,
           })
         }

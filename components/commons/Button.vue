@@ -3,7 +3,7 @@
     :is="tag"
     :to="to"
     class="button"
-    :class="`button-${variant} button-${size}`"
+    :class="[variantButton, sizeButton, notPointerEvents]"
     @click="$emit('click')"
   >
     <slot></slot>
@@ -45,10 +45,18 @@ export default {
       default: 'md',
       validator: (value) => sizes.includes(value),
     },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
       tag: 'span',
+      variantButton: `button-${this.variant}`,
+      sizeButton: `button-${this.size}`,
+      notPointerEvents: this.disabled ? 'pointer-events-none' : '',
     }
   },
   mounted() {

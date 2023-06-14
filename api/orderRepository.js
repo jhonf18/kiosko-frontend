@@ -59,6 +59,37 @@ export const orderRepository = ($axios) => ({
       }
     })
   },
+  updateStatus({ id, payload }) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const result = await $axios.$put(
+          `/managment-orders/orders/change-status-order/${id}`,
+          payload
+        )
+        resolve(result.data)
+      } catch (err) {
+        if (err.response && err.response.data) {
+          reject(err.response.data.error)
+        }
+      }
+    })
+  },
+
+  deleteProductOfOrder({ id, payload }) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const result = await $axios.$put(
+          `/managment-orders/orders/delete-product-of-order/${id}`,
+          payload
+        )
+        resolve(result.data)
+      } catch (err) {
+        if (err.response && err.response.data) {
+          reject(err.response.data.error)
+        }
+      }
+    })
+  },
 
   delete(id) {
     return new Promise(async (resolve, reject) => {

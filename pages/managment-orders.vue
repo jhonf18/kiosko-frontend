@@ -82,7 +82,7 @@
               {{ order.created_at_hours }}
             </td>
 
-            <td class="p-4">
+            <td class="p-4" v-if="order.waiter">
               {{ order.waiter.name }}
             </td>
 
@@ -130,13 +130,13 @@
       ref="component-modal-information-order"
       :order="orderSelected"
       @finishOrder="onFinishOrder"
+      @deleteOrder="onDeleteOrder"
     ></ModalInformationOrder>
   </div>
 </template>
 
 <script>
 import ModalInformationOrder from '@/components/blocks/Modals/ModalInformationOrder.vue'
-import { getPrettyIngredients } from '~/assets/utils/ingredientsFormatter'
 import { normalizeText } from '~/assets/utils/normalize'
 
 // TODO: Falta finalizar orden y realizar conexión de eventos en tiempo real
@@ -144,6 +144,7 @@ import { normalizeText } from '~/assets/utils/normalize'
 export default {
   data() {
     return {
+      waiterSearch: '',
       orders: [],
       openOrders: [],
       closedOrders: [],
@@ -159,7 +160,7 @@ export default {
           value: 'closed',
         },
       ],
-      waiterSearch: '',
+
       orderSelected: { selected_products: [] },
     }
   },
@@ -174,19 +175,96 @@ export default {
   },
   methods: {
     handleSocket() {
+      const TOKEN = localStorage.getItem('auth._token.local').split(' ')[1]
+
       this.socket = this.$nuxtSocket({
         name: 'main',
       })
 
       this.socket.emit('authentication', {
-        token:
-          'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMzgxMTVlNi1jYjQ4LTRjNTktYTQ3ZC04YWZkNjYwNjcyZDUiLCJpZCI6Ijc1OTVmYjU0LWE0OTktNGEyNi05YjkzLWQ1YjE5ZmNhMmQ5NCIsImlkX2JyYW5jaF9vZmZpY2UiOiJlZjU1MzU4Yi0zOTI2LTQ2YTYtYThhZS01ZDlhOTA3ZjAxY2MiLCJpYXQiOjE2ODU5MjI0ODksImV4cCI6MTY4NTk4NzI4OSwiYXVkIjoia2lvc2tvIn0.Oj4jXJwxX6uDl-IplwZsewYBYaX4CcmJpAF7efhQm_LJtSOkk2PBJJvjfFj_jz-XGo9Qr-baP06rR2wO2m8Wuw',
+        token: TOKEN,
       })
 
       this.socket.on('authenticated', () => {
-        this.socket.on('new-order', (order) => {
-          this.orders.push(order)
+        this.socket.on('new-order', ({ order, tickets }) => {
+          const fullName = order.name
+          const name = order.name.split('-')[0]
+          order.name = name
+          order.fullName = fullName
+
+          const date = new Date(order.created_at).toLocaleTimeString([], {
+            hour12: true,
+          })
+          order.created_at_hours = date
+
+          const orderIndex = this.openOrders.findIndex(
+            (orderItem) => orderItem.id === order.id
+          )
+
+          if (orderIndex !== -1) {
+            order.selected_products = this.openOrders[
+              orderIndex
+            ].selected_products.concat(tickets.map((ticket) => ticket.product))
+
+            order.tickets = this.openOrders[orderIndex].tickets.concat(tickets)
+
+            this.$set(this.openOrders, orderIndex, {
+              ...this.openOrders[orderIndex],
+              tickets: order.tickets,
+              selected_products: order.selected_products,
+              total_price: order.total_price,
+            })
+            if (this.waiterSearch === '') {
+              const orderIndexInOrders = this.orders.findIndex(
+                (orderItem) => orderItem.id === order.id
+              )
+              this.$set(this.orders, orderIndexInOrders, {
+                ...this.orders[orderIndexInOrders],
+                tickets: order.tickets,
+                selected_products: order.selected_products,
+                total_price: order.total_price,
+              })
+            }
+          } else {
+            order.selected_products = tickets.map((ticket) => ticket.product)
+            order.tickets = tickets
+            this.orders.unshift(order)
+            this.openOrders.unshift(order)
+          }
         })
+
+        this.socket.on('update-order', ({ order, ticket }) => {
+          this.waiterSearch = ''
+          const fullName = order.name
+          const name = order.name.split('-')[0]
+          order.name = name
+          order.fullName = fullName
+
+          const date = new Date(order.created_at).toLocaleTimeString([], {
+            hour12: true,
+          })
+          order.created_at_hours = date
+
+          const orderIndex = this.this.orders.findIndex(
+            (orderItem) => orderItem.id === order.id
+          )
+
+          const orderIndexInOpenOrders = this.openOrders.findIndex(
+            (orderItem) => orderItem.id === order.id
+          )
+
+          console.log(order)
+          console.log(ticket)
+
+          order.selected_products = ticket.product
+          this.orders[orderIndex].tickets.push(ticket)
+          this.openOrders[orderIndexInOpenOrders].tickets.push(ticket)
+          // this.$set(this.orders, orderIndex, order)
+          // this.$set(this.openOrders, orderIndex, order)
+        })
+
+        this.socket.on('oven:finished-order', this.onEventFinishedOrder)
+        this.socket.on('kitchen:finished-order', this.onEventFinishedOrder)
       })
 
       this.socket.on('unauthorized', (err) => {
@@ -200,24 +278,14 @@ export default {
       try {
         let orders = await this.$orderRepository.index({ getData, filter })
         orders = orders.map((order) => {
-          let finished = true
-          order.selected_products = order.selected_products.map((product) => {
-            const ingredientsText = getPrettyIngredients(product.ingredients)
-            const commentsText = product.comments.split('::')[1]
-            const ticket = order.tickets.find(
-              (ticket) => ticket.id === product.ticket_id
-            )
-            if (ticket && !ticket.date_finished) finished = false
-            return {
-              ...product,
-              ingredients_text: ingredientsText,
-              comments_text: commentsText,
-              ...(ticket && { ticket }),
-            }
-          })
-
+          const finished = this.verifyFinishedOrder(
+            order.selected_products,
+            order.tickets
+          )
+          const fullName = order.name
           const name = order.name.split('-')[0]
           order.name = name
+          order.fullName = fullName
 
           const date = new Date(order.created_at).toLocaleTimeString([], {
             hour12: true,
@@ -249,6 +317,18 @@ export default {
         console.log(err)
       }
     },
+    verifyFinishedOrder(products, tickets) {
+      let finished = true
+      for (const product of products) {
+        const ticket = tickets.find((ticket) => ticket.id === product.ticket_id)
+        if (ticket && !ticket.date_finished) {
+          finished = false
+          break
+        }
+      }
+
+      return finished
+    },
     onWaiterSearch() {
       const search = normalizeText(this.waiterSearch.toLowerCase())
       if (this.filter === 'open') {
@@ -271,10 +351,106 @@ export default {
       }
     },
     openModalInformation({ order, index }) {
-      this.orderSelected = { ...order }
+      this.orderSelected = { ...order, orderIndex: index }
       this.$refs['component-modal-information-order'].open()
     },
-    onFinishOrder() {},
+    onEventFinishedOrder({ order, ticket }) {
+      const orderIndex = this.orders.findIndex(
+        (orderItem) => orderItem.id === order.id
+      )
+
+      if (orderIndex !== -1) {
+        const ticketIndex = this.orders[orderIndex].tickets.findIndex(
+          (ticketItem) => ticketItem.id === ticket.id
+        )
+        if (ticketIndex !== -1) {
+          ticket.date_finished = new Date()
+          this.$set(this.orders[orderIndex].tickets, ticketIndex, ticket)
+
+          console.log('Verificando si la orden esta terminada')
+
+          const isFinishedOrder = this.verifyFinishedOrder(
+            this.orders[orderIndex].selected_products,
+            this.orders[orderIndex].tickets
+          )
+          // console.log(this.orders[orderIndex])
+          if (isFinishedOrder) {
+            this.$set(this.orders[orderIndex], 'finished', true)
+          }
+        } else {
+          this.orders[orderIndex].tickets.push(ticket)
+        }
+      } else {
+        this.orders.unshift(order)
+      }
+    },
+    async onEventUpdatedOrder() {},
+    async onFinishOrder(order) {
+      const id = order.id
+      const payload = {
+        is_open: false,
+      }
+
+      try {
+        const response = await this.$orderRepository.updateStatus({
+          id,
+          payload,
+        })
+
+        if (response) {
+          this.$set(this.orders, order.orderIndex, {
+            ...this.orders[order.orderIndex],
+            is_open: false,
+          })
+
+          const orderIndexInOpenOrders = this.openOrders.findIndex(
+            (openOrder) => openOrder.id === order.id
+          )
+          this.openOrders.splice(orderIndexInOpenOrders, 1)
+          this.closedOrders.unshift({
+            ...this.orders[order.orderIndex],
+            is_open: false,
+          })
+
+          this.onChangeFilter()
+          this.$refs['component-modal-information-order'].close()
+
+          // emit event
+          this.socket.emit('close-order', { ...order, is_open: false })
+        }
+      } catch (err) {
+        // Handle error
+        console.log(err)
+      }
+    },
+    async onDeleteOrder(order) {
+      const id = order.id
+
+      try {
+        await this.$orderRepository.delete(id)
+
+        const orderIndex = order.orderIndex
+        this.orders.splice(orderIndex, 1)
+
+        const orderIndexInOpenOrders = this.openOrders.findIndex(
+          (openOrder) => openOrder.id === order.id
+        )
+        if (orderIndexInOpenOrders !== -1) {
+          this.openOrders.splice(orderIndexInOpenOrders, 1)
+        } else {
+          const orderIndexInClosedOrders = this.closedOrders.findIndex(
+            (closedOrder) => closedOrder.id === order.id
+          )
+          this.closedOrders.splice(orderIndexInClosedOrders, 1)
+        }
+
+        this.$refs['component-modal-information-order'].close()
+        this.socket.emit('delete-order', { order })
+      } catch (err) {
+        // Handle error
+        console.log(err)
+      }
+    },
   },
 }
 </script>

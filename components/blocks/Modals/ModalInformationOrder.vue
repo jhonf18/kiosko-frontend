@@ -91,12 +91,19 @@
         {{ order.total_price | formatCurrency }}
       </span>
     </div>
-    <div
-      class="flex justify-center my-5"
-      v-if="order.is_open"
-      @click="$emit('finishOrder', order)"
-    >
-      <Button variant="primary">
+    <div class="flex justify-center my-6" v-if="order.is_open">
+      <Button
+        variant="danger"
+        class="mr-2"
+        @click="$emit('deleteOrder', order)"
+      >
+        <span>Eliminar pedido</span>
+      </Button>
+      <Button
+        variant="primary"
+        @click="$emit('finishOrder', order)"
+        :disabled="!order.finished"
+      >
         <span>Finalizar pedido</span>
       </Button>
     </div>
