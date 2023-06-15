@@ -296,7 +296,6 @@ export default {
   mounted() {
     this.getTickets()
     this.openSocketConnection()
-    this.handleSocket()
   },
   methods: {
     openSocketConnection() {
@@ -340,6 +339,7 @@ export default {
             this.openTickets.push(ticket)
           }
         })
+        this.socket.on('delete-product', this.onEventDeleteProductInOrder)
       })
       this.socket.on('unauthorized', (err) => {
         console.log(err)
@@ -362,7 +362,14 @@ export default {
         return commentWithoutDoubleLineArray.join(', ')
       }
     },
-    handleSocket() {},
+    onEventDeleteProductInOrder({ ticket }) {
+      console.log(ticket, this.openTickets)
+      const indexTicket = this.openTickets.findIndex((t) => ticket.id === t.id)
+
+      if (indexTicket > -1) {
+        this.openTickets.splice(indexTicket, 1)
+      }
+    },
     async getTickets() {
       let section = ''
       if (this.$auth.user.role === 'ROLE_OVEN_COOK') {

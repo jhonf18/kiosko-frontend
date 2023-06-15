@@ -73,9 +73,13 @@ export default {
       this.$refs['component-modal-actions-edit-product-in-order-views'].open()
     },
     deleteProduct() {
+      const commentID = this.product.comments_id
       this.$emit('deleteProduct', {
         order: this.order,
-        product: this.product,
+        product: {
+          ...this.product,
+          comments: `${commentID}::${this.product.comments}`,
+        },
         indexOrder: this.indexOrder,
         indexProduct: this.indexProduct,
       })

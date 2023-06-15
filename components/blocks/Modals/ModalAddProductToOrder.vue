@@ -291,7 +291,14 @@ export default {
       this.$emit('finished', true)
     },
     async getOrders() {
-      const filter = `waiter=${this.$auth.user.id}&sort_by=desc(created_at)&is_open=true`
+
+      let today = new Date()
+      today.setHours(0)
+      today.setMinutes(0)
+      today.setSeconds(0)
+      today.setMilliseconds(0)
+
+      const filter = `waiter=${this.$auth.user.id}&sort_by=asc(created_at)&is_open=true&today=${today.getTime()}`
       const getData =
         'name,is_open,created_at,total_price,id,branch_office,branch_office.id,selected_products.id,selected_products.ingredients,selected_products.name,selected_products.price,selected_products.category,waiter.name'
 

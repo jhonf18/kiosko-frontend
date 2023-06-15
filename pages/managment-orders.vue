@@ -262,6 +262,8 @@ export default {
 
         this.socket.on('oven:finished-order', this.onEventFinishedOrder)
         this.socket.on('kitchen:finished-order', this.onEventFinishedOrder)
+
+        this.socket.on('delete-product', this.onEventDeleteProductInOrder)
       })
 
       this.socket.on('unauthorized', (err) => {
@@ -312,6 +314,37 @@ export default {
       } catch (err) {
         // Handle error
         console.log(err)
+      }
+    },
+    onEventDeleteProductInOrder({ order, ticket }) {
+      const orderIndex = this.openOrders.findIndex(
+        (orderItem) => orderItem.id === order.id
+      )
+
+      if (orderIndex > -1) {
+        // Delete product in selected_products property
+        const productIndex = this.openOrders[
+          orderIndex
+        ].selected_products.findIndex(
+          (productItem) => productItem.ticket_id === ticket.id
+        )
+
+        if (productIndex > -1) {
+          this.openOrders[orderIndex].selected_products.splice(productIndex, 1)
+        }
+
+        // Delete ticket
+
+        const ticketIndex = this.openOrders[orderIndex].tickets.findIndex(
+          (ticketItem) => ticketItem.id === ticket.id
+        )
+
+        if (ticketIndex > -1) {
+          this.openOrders[orderIndex].tickets.splice(ticketIndex, 1)
+        }
+
+        // update total price
+        this.openOrders[orderIndex].total_price = order.total_price
       }
     },
     verifyFinishedOrder(products, tickets) {

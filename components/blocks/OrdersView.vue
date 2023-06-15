@@ -229,14 +229,15 @@ export default {
         this.$auth.user.id
       }&sort_by=desc(created_at)&today=${today.getTime()}`
       const getData =
-        'name,is_open,created_at,total_price,id,branch_office,branch_office.id,selected_products.id,selected_products.ingredients,selected_products.name,selected_products.price,selected_products.category,selected_products.media_files,waiter.name'
+        'name,is_open,created_at,total_price,id,branch_office,branch_office.id,selected_products.ticket_id,selected_products.id,selected_products.ingredients,selected_products.name,selected_products.price,selected_products.category,selected_products.media_files,waiter.name'
       try {
         let orders = await this.$orderRepository.index({ getData, filter })
         orders = orders.map((order) => {
           let finished = true
           order.selected_products = order.selected_products.map((product) => {
             const ingredientsText = getPrettyIngredients(product.ingredients)
-            const commentsText = product.comments.split('::')[1]
+            const completeComment = product.comments
+            const commentsText = completeComment.split('::')[1]
             const ticket = order.tickets.find(
               (ticket) => ticket.id === product.ticket_id
             )
@@ -348,7 +349,50 @@ export default {
         this.$refs['modal-actions-products'].close()
       }
     },
-    deleteProduct() {},
+    async deleteProduct({ order, product, indexOrder, indexProduct }) {
+      const orderID = order.id
+
+      const payload = {
+        product_id: product.id,
+        product_comments: product.comments,
+      }
+
+      try {
+        await this.$orderRepository.deleteProductOfOrder({
+          id: orderID,
+          payload,
+        })
+
+        this.openOrders[indexOrder].selected_products.splice(indexProduct, 1)
+
+        this.openOrders[indexOrder].total_price =
+          this.openOrders[indexOrder].total_price - product.price
+
+        if (this.isFinishedOrder(this.openOrders[indexOrder])) {
+          this.openOrders[indexOrder].finished = true
+        }
+
+        const ticketIndex = this.openOrders[indexOrder].tickets.findIndex(
+          (ticket) => {
+            return ticket.id === product.ticket_id
+          }
+        )
+
+        if (ticketIndex > -1) {
+          this.$emit('emitSocket', {
+            name: 'delete-product-of-order',
+            order: this.openOrders[indexOrder],
+            product,
+            ticket: this.openOrders[indexOrder].tickets[ticketIndex],
+          })
+        }
+
+        this.$refs['modal-actions-products'].close()
+      } catch (err) {
+        // TODO: Handle error
+        console.log(err)
+      }
+    },
   },
   watch: {
     active() {
