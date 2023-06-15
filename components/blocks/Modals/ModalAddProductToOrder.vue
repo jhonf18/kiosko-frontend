@@ -250,6 +250,14 @@ export default {
         product.ingredients_selected
       )
 
+      let products = []
+      let totalPrice = 0
+
+      for (let i = 0; i < product.quantity; i++) {
+        products.unshift(product)
+        totalPrice += product.price
+      }
+
       const options = {
         year: 'numeric',
         month: 'long',
@@ -258,14 +266,6 @@ export default {
         minute: 'numeric',
         second: 'numeric',
         hour12: false,
-      }
-
-      let products = []
-      let totalPrice = 0
-
-      for (let i = 0; i < product.quantity; i++) {
-        products.unshift(product)
-        totalPrice += product.price
       }
 
       const cart = [
@@ -326,35 +326,44 @@ export default {
       }
     },
     async addProductToSendedOrder(order, index) {
-      let productToAdd = {}
-      productToAdd.selected_products = [
-        {
-          product: this.product.id,
-          ids_selected_ingredients: this.product.ingredients_selected.map(
-            (ingredient) => ingredient.id
-          ),
-          comments: this.product.comments,
-        },
-      ]
+      const payload = {
+        product: this.product.id,
+        ids_selected_ingredients: this.product.ingredients_selected.map(
+          (ingredient) => ingredient.id
+        ),
+        comments: this.product.comments,
+      }
+
+      let data = []
+
+      for (let i = 0; i < this.product.quantity; i++) {
+        data.unshift(payload)
+      }
 
       let response = null
 
       try {
-        response = await this.$orderRepository.addProductToOrder(
-          order.id,
-          productToAdd
-        )
+        response = await this.$orderRepository.addProductToOrder(order.id, {
+          selected_products: data,
+        })
       } catch (err) {
         // TODO: Manejar el error
         console.log(err)
       }
 
       if (response) {
+        const waiter = {
+          id: this.$auth.user.id,
+          name: this.$auth.user.name,
+          email: this.$auth.user.email,
+        }
+
         this.$root.$emit('emitSocket', {
           name: 'create-order',
           order: response.order,
           tickets: response.tickets.map((ticket) => {
             ticket.order = response.order
+            ticket.waiter = waiter
             return ticket
           }),
         })

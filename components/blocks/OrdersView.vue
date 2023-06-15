@@ -1,6 +1,6 @@
 <template>
-  <div class="px-6 pt-5">
-    <tabs>
+  <div class="px-6 pt-5 pb-10">
+    <tabs :key="keyTabs">
       <tab :selected="true" name="Abiertas" size="lg">
         <CollapseContent
           :withShadow="true"
@@ -198,6 +198,7 @@ export default {
       key: 1,
       indexProduct: -1,
       indexOrder: -1,
+      keyTabs: 0,
     }
   },
   methods: {
@@ -218,7 +219,15 @@ export default {
       this.$refs['modal-actions-products'].open()
     },
     async getOrders() {
-      const filter = `waiter=${this.$auth.user.id}&sort_by=desc(created_at)`
+      let today = new Date()
+      today.setHours(0)
+      today.setMinutes(0)
+      today.setSeconds(0)
+      today.setMilliseconds(0)
+
+      const filter = `waiter=${
+        this.$auth.user.id
+      }&sort_by=desc(created_at)&today=${today.getTime()}`
       const getData =
         'name,is_open,created_at,total_price,id,branch_office,branch_office.id,selected_products.id,selected_products.ingredients,selected_products.name,selected_products.price,selected_products.category,selected_products.media_files,waiter.name'
       try {
@@ -243,6 +252,7 @@ export default {
         })
         this.openOrders = orders.filter((order) => order.is_open)
         this.closedOrders = orders.filter((order) => !order.is_open)
+        this.keyTabs = new Date().getTime()
       } catch (err) {
         // TODO: Handle error
         console.log(err)
@@ -255,28 +265,38 @@ export default {
         index = ind
         return ord.id === order.id
       })
-      const ticketIndex = orderStore.selected_products.findIndex((product) => {
-        return product.ticket_id === ticket.id
-      })
-      let ticketForUpdate = {}
-      if (status === 'accepted') {
-        ticketForUpdate = {
-          ...ticket,
-          date_accepted: new Date(),
+
+      if (orderStore) {
+        let ticketForUpdate = {}
+        if (status === 'accepted') {
+          ticketForUpdate = {
+            ...ticket,
+            date_accepted: new Date(),
+          }
+        } else {
+          ticketForUpdate = {
+            ...ticket,
+            date_accepted: new Date(),
+            date_finished: new Date(),
+          }
         }
-      } else {
-        ticketForUpdate = {
-          ...ticket,
-          date_accepted: new Date(),
-          date_finished: new Date(),
+
+        const ticketIndex = orderStore.selected_products.findIndex(
+          (product) => {
+            return product.ticket_id === ticket.id
+          }
+        )
+
+        if (ticketIndex) {
+          if (orderStore.is_open) {
+            this.openOrders[index].selected_products[ticketIndex].ticket =
+              ticketForUpdate
+          }
         }
-      }
-      if (orderStore.is_open) {
-        this.openOrders[index].selected_products[ticketIndex].ticket =
-          ticketForUpdate
-      }
-      if (this.isFinishedOrder(this.openOrders[index])) {
-        this.openOrders[index].finished = true
+
+        if (this.isFinishedOrder(this.openOrders[index])) {
+          this.openOrders[index].finished = true
+        }
       }
     },
     isFinishedOrder(order) {

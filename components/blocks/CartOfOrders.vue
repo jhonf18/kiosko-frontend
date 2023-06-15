@@ -151,13 +151,15 @@ export default {
         console.log(err)
       }
 
+      const waiter = {
+        id: this.$auth.user.id,
+        name: this.$auth.user.name,
+        email: this.$auth.user.email,
+      }
+
       const orderToEmit = {
         ...response.order,
-        waiter: {
-          id: this.$auth.user.id,
-          name: this.$auth.user.name,
-          email: this.$auth.user.email,
-        },
+        waiter,
       }
       if (response) {
         this.$emit('emitSocket', {
@@ -165,6 +167,7 @@ export default {
           order: orderToEmit,
           tickets: response.tickets.map((ticket) => {
             ticket.order = response.order
+            ticket.waiter = waiter
             return ticket
           }),
         })

@@ -204,6 +204,7 @@ export default {
       this.quantity = 1
       // this.selectedIngredients = []
       this.meatTerm = ''
+      this.comments = ''
     },
     open() {
       this.$refs[`component-${this.nameRef}`].open()
@@ -214,53 +215,6 @@ export default {
     },
     showModalAddProduct() {
       this.$refs['modal-add-product-to-order'].open()
-    },
-    addToCart() {
-      const productToAdd = {
-        product: this.product.id,
-        ...(this.selectedIngredients.length > 0 && {
-          ids_selected_ingredients: this.selectedIngredients.map(
-            (ingredient) => ingredient.id
-          ),
-        }),
-        ...(this.meatTerm && {
-          comments: `${this.meatTerm}--${this.comments}`,
-        }),
-      }
-
-      const cartStore = JSON.parse(localStorage.getItem('cart'))
-
-      if (!cartStore) {
-        const cart = [
-          {
-            waiter: this.$auth.user.id,
-            cart: [productToAdd],
-          },
-        ]
-        localStorage.setItem('cart', JSON.stringify(cart))
-      } else {
-        const index = this.findCartByUser(cartStore)
-
-        if (index >= cartStore.length) {
-          cartStore[index] = {
-            waiter: this.$auth.user.id,
-            cart: [productToAdd],
-          }
-        } else {
-          cartStore[index].cart.push(productToAdd)
-        }
-
-        localStorage.setItem('cart', JSON.stringify(cartStore))
-      }
-    },
-    findCartByUser(cart) {
-      if (cart) {
-        const index = cart.findIndex(
-          (item) => item.waiter === this.$auth.user.id
-        )
-        return index < 0 ? cart.length - 1 : index
-      }
-      return 0
     },
   },
   computed: {

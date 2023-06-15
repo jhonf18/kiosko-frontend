@@ -202,16 +202,14 @@ export default {
           )
 
           if (orderIndex !== -1) {
-            order.selected_products = this.openOrders[
-              orderIndex
-            ].selected_products.concat(tickets.map((ticket) => ticket.product))
-
             order.tickets = this.openOrders[orderIndex].tickets.concat(tickets)
 
             this.$set(this.openOrders, orderIndex, {
               ...this.openOrders[orderIndex],
               tickets: order.tickets,
               selected_products: order.selected_products,
+              is_open: true,
+              finished: false,
               total_price: order.total_price,
             })
             if (this.waiterSearch === '') {
@@ -221,12 +219,14 @@ export default {
               this.$set(this.orders, orderIndexInOrders, {
                 ...this.orders[orderIndexInOrders],
                 tickets: order.tickets,
+                finished: false,
+                is_open: true,
                 selected_products: order.selected_products,
                 total_price: order.total_price,
               })
             }
           } else {
-            order.selected_products = tickets.map((ticket) => ticket.product)
+            // order.selected_products = order.selected
             order.tickets = tickets
             this.orders.unshift(order)
             this.openOrders.unshift(order)
@@ -252,9 +252,6 @@ export default {
           const orderIndexInOpenOrders = this.openOrders.findIndex(
             (orderItem) => orderItem.id === order.id
           )
-
-          console.log(order)
-          console.log(ticket)
 
           order.selected_products = ticket.product
           this.orders[orderIndex].tickets.push(ticket)
@@ -367,13 +364,10 @@ export default {
           ticket.date_finished = new Date()
           this.$set(this.orders[orderIndex].tickets, ticketIndex, ticket)
 
-          console.log('Verificando si la orden esta terminada')
-
           const isFinishedOrder = this.verifyFinishedOrder(
             this.orders[orderIndex].selected_products,
             this.orders[orderIndex].tickets
           )
-          // console.log(this.orders[orderIndex])
           if (isFinishedOrder) {
             this.$set(this.orders[orderIndex], 'finished', true)
           }

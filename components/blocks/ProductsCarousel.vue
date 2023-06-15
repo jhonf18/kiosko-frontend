@@ -125,17 +125,23 @@ export default {
           {
             breakpoint: 1024,
             settings: {
+              slidesToShow: 4,
+            },
+          },
+          {
+            breakpoint: 868,
+            settings: {
               slidesToShow: 3,
             },
           },
           {
-            breakpoint: 768,
+            breakpoint: 640,
             settings: {
               slidesToShow: 2,
             },
           },
           {
-            breakpoint: 640,
+            breakpoint: 470,
             settings: {
               slidesToShow: 1,
             },
@@ -143,7 +149,7 @@ export default {
         ],
       },
       buttons,
-      productsStore: [{ media_files: [] }],
+      productsStore: [],
       subcategories: [],
       productToAdd: { media_files: [] },
     }
@@ -165,7 +171,7 @@ export default {
       })
 
       this.subcategories[index].active = true
-      this.carouselKey = new Date.getTime()
+      this.carouselKey = new Date().getTime()
     },
     move(to) {
       if (to === 'prev') {

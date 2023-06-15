@@ -2,7 +2,11 @@
   <div
     :class="{ 'border border-gray shadow-md px-2 py-2 rounded': withShadow }"
   >
-    <div class="flex items-center cursor-pointer w-full" @click="toggleContent">
+    <div
+      class="flex items-center cursor-pointer w-full"
+      @click="toggleContent"
+      :class="{ 'px-3 py-4': big }"
+    >
       <div class="min-w-[125px]" :class="{ 'w-full': !title }">
         <h3 class="font-semibold" v-if="title">{{ title }}</h3>
         <slot name="title"></slot>
@@ -13,6 +17,7 @@
           class="transition-all duration-300 w-7 h-7"
           :class="{
             'rotate-180': isOpen,
+            '!w-9 !h-9': big,
           }"
         />
       </div>
@@ -37,6 +42,11 @@ export default {
       required: false,
     },
     withShadow: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    big: {
       type: Boolean,
       required: false,
       default: false,
