@@ -293,7 +293,15 @@ export default {
       })
     },
     async getOrders() {
-      const filter = `&sort_by=desc(created_at)&branch_office=${this.$auth.user.branch_office}`
+      let today = new Date()
+      today.setHours(0)
+      today.setMinutes(0)
+      today.setSeconds(0)
+      today.setMilliseconds(0)
+
+      const filter = `&sort_by=desc(created_at)&branch_office=${
+        this.$auth.user.branch_office
+      }&today=${today.getTime()}`
       const getData =
         'name,is_open,created_at,total_price,id,branch_office,branch_office.id,selected_products.id,selected_products.ingredients,selected_products.name,selected_products.price,selected_products.category,selected_products.media_files,waiter.name,waiter.id,waiter.email,waiter.nickname'
       try {
