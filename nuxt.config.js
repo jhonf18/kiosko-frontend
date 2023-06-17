@@ -4,6 +4,10 @@ import metadataStatic from './plugins/metadata/metadataStatic'
 
 export default {
   target: 'server',
+  server: {
+    host: '0.0.0.0',
+    port: process.env.PORT || 3000,
+  },
   publicRuntimeConfig: {
     axios: {
       browserBaseURL: process.env.API_BASE_URL,
