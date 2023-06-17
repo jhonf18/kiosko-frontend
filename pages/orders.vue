@@ -49,6 +49,7 @@
 import { mapMutations } from 'vuex'
 import { generalStoreNames } from '~/store/general'
 
+import { formatErrorMessages } from '~/assets/utils/formatErrorMessage'
 import BottomTabs from '~/components/blocks/BottomTabs.vue'
 import CartOfOrders from '~/components/blocks/CartOfOrders.vue'
 import CategoriesBanner from '~/components/blocks/CategoriesBanner.vue'
@@ -78,6 +79,7 @@ const headerTabs = [
 
 export default {
   name: 'OrdersPage',
+  middleware: ['authWaiter'],
   data() {
     return {
       headerTabs,
@@ -115,6 +117,15 @@ export default {
     ...mapMutations({
       showToast: generalStoreNames.mutations.showToast,
     }),
+    isValidBranchOffice(order) {
+      if (
+        !order.branch_office ||
+        order.branch_office.id !== this.$auth.user.branch_office
+      ) {
+        return false
+      }
+      return true
+    },
     categorySelected(category) {
       this.category = category
     },
@@ -127,8 +138,10 @@ export default {
         })
         this.products = products
       } catch (err) {
-        // TODO: Manejar el error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+        })
       }
     },
     openSocketConnection() {
@@ -145,8 +158,9 @@ export default {
       })
 
       this.socket.on('authenticated', () => {
-        // TODO: Change face
         this.socket.on('kitchen:accepted-order', ({ order, ticket }) => {
+          if (!this.isValidBranchOffice(order)) return
+
           this.showToast({
             text: `Preparando ${ticket.product.name} para ${order.name}`,
             type: 'default',
@@ -159,6 +173,8 @@ export default {
         })
 
         this.socket.on('oven:accepted-order', ({ order, ticket }) => {
+          if (!this.isValidBranchOffice(order)) return
+
           this.showToast({
             text: `Preparando ${ticket.product.name} para ${order.name}`,
             type: 'default',
@@ -171,6 +187,8 @@ export default {
         })
 
         this.socket.on('kitchen:finished-order', ({ order, ticket }) => {
+          if (!this.isValidBranchOffice(order)) return
+
           this.showToast({
             text: `Ha terminado la preparación de ${ticket.product.name} para ${order.name}`,
             type: 'success',
@@ -183,6 +201,8 @@ export default {
         })
 
         this.socket.on('oven:finished-order', ({ order, ticket }) => {
+          if (!this.isValidBranchOffice(order)) return
+
           this.showToast({
             text: `Ha terminado la preparación de ${ticket.product.name} para ${order.name}`,
             type: 'success',
@@ -193,10 +213,11 @@ export default {
           })
           this.headerTabs[2].hasNotification = true
         })
+
+        this.socket.on('closed-order', this.onEventClosedOrder)
       })
 
       this.socket.on('unauthorized', (err) => {
-        console.log(err)
         this.onError = err.message
       })
     },
@@ -204,6 +225,13 @@ export default {
       let dataToSend = { ...data }
       delete dataToSend.name
       this.socket.emit(data.name, dataToSend)
+    },
+    onEventClosedOrder({ order }) {
+      if (!this.isValidBranchOffice(order)) return
+
+      this.$refs['order-views-component'].closedOrder({
+        order,
+      })
     },
     toggleBottomTabs(tabNumber) {
       if (tabNumber === 3 && this.headerTabs[2].hasNotification) {

@@ -1,6 +1,5 @@
 <template>
   <div class="mt-6 px-4">
-    <!-- <h2 class="text-3xl font-bold mb-5">{{ title }}</h2> -->
     <BottomTabs>
       <template v-slot:menu-header-1="{ active }">
         <a
@@ -275,11 +274,16 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
+import { formatErrorMessages } from '~/assets/utils/formatErrorMessage'
+
 import { getPrettyIngredients } from '~/assets/utils/ingredientsFormatter'
 import BottomTabs from '~/components/blocks/BottomTabs.vue'
+import { generalStoreNames } from '~/store/general'
 
 export default {
   name: 'Tickets',
+  middleware: ['authCook'],
   data() {
     return {
       openTickets: [],
@@ -298,6 +302,16 @@ export default {
     this.openSocketConnection()
   },
   methods: {
+    ...mapMutations({
+      showToast: generalStoreNames.mutations.showToast,
+    }),
+    isValidTickets(tickets) {
+      return tickets.every(
+        (ticket) =>
+          ticket.branch_office &&
+          ticket.branch_office.id === this.$auth.user.branch_office
+      )
+    },
     openSocketConnection() {
       const TOKEN = localStorage.getItem('auth._token.local').split(' ')[1]
       this.socket = this.$nuxtSocket({
@@ -311,6 +325,10 @@ export default {
       })
       this.socket.on('authenticated', () => {
         this.socket.on('new-order', (tickets) => {
+          if (!this.isValidTickets(tickets)) {
+            return
+          }
+
           tickets = tickets
             .map((ticket) => {
               ticket.product.ingredients_text = getPrettyIngredients(
@@ -329,6 +347,9 @@ export default {
           this.keyOpenTickets++
         })
         this.socket.on('update-order', (ticket) => {
+          if (!this.isValidTickets([ticket])) {
+            return
+          }
           const indexTicket = this.tickets.findIndex((t) => t.id === ticket.id)
           ticket.product.ingredients_text = getPrettyIngredients(
             ticket.product.ingredients
@@ -363,7 +384,9 @@ export default {
       }
     },
     onEventDeleteProductInOrder({ ticket }) {
-      console.log(ticket, this.openTickets)
+      if (!this.isValidTickets([ticket])) {
+        return
+      }
       const indexTicket = this.openTickets.findIndex((t) => ticket.id === t.id)
 
       if (indexTicket > -1) {
@@ -387,7 +410,7 @@ export default {
       today.setSeconds(0)
       today.setMilliseconds(0)
 
-      const filter = `sort_by=asc(created_at)&sections=${section}&brach_office=${
+      const filter = `sort_by=asc(created_at)&sections=${section}&branch_office=${
         this.$auth.user.branch_office
       }&today=${today.getTime()}`
 
@@ -397,8 +420,11 @@ export default {
       try {
         tickets = await this.$ticketRepository.index({ getData, filter })
       } catch (err) {
-        // TODO: Handle error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
       }
       if (tickets) {
         tickets = tickets.map((ticket) => {
@@ -436,7 +462,7 @@ export default {
         })
         if (response) {
           this.socket.emit(`${this.section}:accept-order`, {
-            order: ticket.order,
+            order: { ...ticket.order, branch_office: ticket.branch_office },
             ticket,
           })
           const indexTicket = this.openTickets.findIndex(
@@ -449,8 +475,11 @@ export default {
           }
         }
       } catch (err) {
-        // TODO: Handle error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
       }
     },
     async finishTicket(ticket) {
@@ -462,6 +491,7 @@ export default {
           this.socket.emit(`${this.section}:finish-order`, {
             order: {
               ...ticket.order,
+              branch_office: ticket.branch_office,
               // selected_products: newSelectedProducts,
             },
             ticket,
@@ -473,8 +503,11 @@ export default {
           this.closedTickets.push(ticket)
         }
       } catch (err) {
-        // TODO: Handle error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
       }
     },
   },

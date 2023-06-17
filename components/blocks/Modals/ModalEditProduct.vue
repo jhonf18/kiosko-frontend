@@ -173,7 +173,6 @@ export default {
         imagePreview: newValue.media_files[0],
         branchOffice: newValue.branch_office.id,
       }
-
       this.findCategoryId()
     },
   },

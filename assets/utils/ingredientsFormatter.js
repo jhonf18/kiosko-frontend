@@ -23,6 +23,7 @@ export const getPrettyIngredients = (ingredients) => {
   })
 
   const ingredientsFormated = ingredientsFormatter(ingredients)
+
   const ingredientsNames = ingredientsFormated.map((ingredient) => {
     let ingredientName = ''
     if (ingredient.quantity) {

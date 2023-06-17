@@ -183,7 +183,10 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
+import { formatErrorMessages } from '~/assets/utils/formatErrorMessage'
 import { getPrettyIngredients } from '~/assets/utils/ingredientsFormatter'
+import { generalStoreNames } from '~/store/general'
 
 export default {
   name: 'ModalAddProductToOrder',
@@ -206,6 +209,9 @@ export default {
     ChevronLeftIcon: () => import('@/static/icons/chevronLeft.svg?inline'),
   },
   methods: {
+    ...mapMutations({
+      showToast: generalStoreNames.mutations.showToast,
+    }),
     open() {
       this.$refs[`component-${this.nameRef}`].open()
     },
@@ -234,10 +240,6 @@ export default {
         cartStore[index].products.unshift(product)
         cartStore[index].total += product.price
       }
-
-      // cartStore[index].products.unshift(product)
-      // cartStore[index].total += product.price
-
       localStorage.setItem('cart', JSON.stringify(cartStore))
       this.close()
       this.$emit('finished', true)
@@ -291,14 +293,15 @@ export default {
       this.$emit('finished', true)
     },
     async getOrders() {
-
       let today = new Date()
       today.setHours(0)
       today.setMinutes(0)
       today.setSeconds(0)
       today.setMilliseconds(0)
 
-      const filter = `waiter=${this.$auth.user.id}&sort_by=asc(created_at)&is_open=true&today=${today.getTime()}`
+      const filter = `waiter=${
+        this.$auth.user.id
+      }&sort_by=asc(created_at)&is_open=true&today=${today.getTime()}`
       const getData =
         'name,is_open,created_at,total_price,id,branch_office,branch_office.id,selected_products.id,selected_products.ingredients,selected_products.name,selected_products.price,selected_products.category,waiter.name'
 
@@ -328,8 +331,11 @@ export default {
 
         this.sendedOrders = orders
       } catch (err) {
-        // TODO: Handle error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
       }
     },
     async addProductToSendedOrder(order, index) {
@@ -354,8 +360,11 @@ export default {
           selected_products: data,
         })
       } catch (err) {
-        // TODO: Manejar el error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
       }
 
       if (response) {

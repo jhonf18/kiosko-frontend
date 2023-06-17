@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="showAnimationScreen"
-    class="absolute z-50 min-w-screen min-h-screen bg-primary w-full h-full flex items-center justify-center"
+    class="absolute z-50 min-w-screen min-h-screen max-h-screen bg-primary w-full h-full flex items-center justify-center"
   >
     <Transition name="bounce">
       <Logotype v-if="showLogotype"></Logotype>

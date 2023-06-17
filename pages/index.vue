@@ -15,6 +15,7 @@ export default {
       password: '',
     }
   },
+  middleware: ['redirectMiddleware'],
   methods: {
     async signinUser() {
       console.log('Signin user')

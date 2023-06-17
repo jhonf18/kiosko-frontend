@@ -2,138 +2,146 @@
   <div class="px-6 pt-5 pb-10">
     <tabs :key="keyTabs">
       <tab :selected="true" name="Abiertas" size="lg">
-        <CollapseContent
-          :withShadow="true"
-          v-for="(order, i) in openOrders"
-          :key="`${i}-${order.name}`"
-          class="mb-2"
-        >
-          <template v-slot:title>
-            <span class="text-lg font-semibold"
-              >{{ order.name }}
-              <span
-                v-if="!order.finished"
-                class="text-base text-primary font-bold"
-              >
-                (En proceso)
-              </span>
-              <span
-                v-else-if="order.finished"
-                class="text-base text-green-700 font-bold"
-              >
-                (Finalizado)
-              </span>
-            </span>
-          </template>
-
-          <div
-            v-for="(product, index) in order.selected_products"
-            :key="`${index}-${product.id}`"
-            @click="openModalActions(order, product, i, index)"
-            class="mb-2 cursor-pointer hover:bg-gray-100 px-2 pb-2"
+        <div v-if="openOrders.length > 0">
+          <CollapseContent
+            :withShadow="true"
+            v-for="(order, i) in openOrders"
+            :key="`${i}-${order.name}`"
+            class="mb-2"
           >
-            <hr />
-            <div class="flex items-center justify-between mt-2">
-              <h4 class="font-medium">
-                {{ product.name }}
+            <template v-slot:title>
+              <span class="text-lg font-semibold"
+                >{{ order.name }}
                 <span
-                  v-if="product.ticket && !product.ticket.date_accepted"
-                  class="text-xs text-red-700 font-semibold"
-                >
-                  (En espera)
-                </span>
-                <span
-                  v-else-if="
-                    product.ticket &&
-                    product.ticket.date_accepted &&
-                    !product.ticket.date_finished
-                  "
-                  class="text-xs text-primary font-semibold"
+                  v-if="!order.finished"
+                  class="text-base text-primary font-bold"
                 >
                   (En proceso)
                 </span>
                 <span
-                  v-else-if="product.ticket && product.ticket.date_finished"
-                  class="text-xs text-green-700 font-semibold"
+                  v-else-if="order.finished"
+                  class="text-base text-green-700 font-bold"
                 >
                   (Finalizado)
                 </span>
-              </h4>
-              <span class="font-semibold text-primary">
-                {{ product.price | formatCurrency }}
               </span>
-            </div>
+            </template>
+
             <div
-              class="pl-2 text-gray-600 text-sm mt-3"
-              v-if="product.ingredients.length > 0"
+              v-for="(product, index) in order.selected_products"
+              :key="`${index}-${product.id}`"
+              @click="openModalActions(order, product, i, index)"
+              class="mb-2 cursor-pointer hover:bg-gray-100 px-2 pb-2"
             >
-              <p>{{ product.ingredients_text }}</p>
-              <p class="mt-2" v-if="product.comments_text">
-                <span class="font-semibold"> Comentarios: </span>
-                {{ product.comments_text }}
-              </p>
+              <hr />
+              <div class="flex items-center justify-between mt-2">
+                <h4 class="font-medium">
+                  {{ product.name }}
+                  <span
+                    v-if="product.ticket && !product.ticket.date_accepted"
+                    class="text-xs text-red-700 font-semibold"
+                  >
+                    (En espera)
+                  </span>
+                  <span
+                    v-else-if="
+                      product.ticket &&
+                      product.ticket.date_accepted &&
+                      !product.ticket.date_finished
+                    "
+                    class="text-xs text-primary font-semibold"
+                  >
+                    (En proceso)
+                  </span>
+                  <span
+                    v-else-if="product.ticket && product.ticket.date_finished"
+                    class="text-xs text-green-700 font-semibold"
+                  >
+                    (Finalizado)
+                  </span>
+                </h4>
+                <span class="font-semibold text-primary">
+                  {{ product.price | formatCurrency }}
+                </span>
+              </div>
+              <div
+                class="pl-2 text-gray-600 text-sm mt-3"
+                v-if="product.ingredients.length > 0"
+              >
+                <p>{{ product.ingredients_text }}</p>
+                <p class="mt-2" v-if="product.comments_text">
+                  <span class="font-semibold"> Comentarios: </span>
+                  {{ product.comments_text }}
+                </p>
+              </div>
             </div>
-          </div>
-          <hr />
-          <div class="flex items-center justify-end mt-6 mb-4">
-            <div class="min-w-[215px] text-right">
-              <span class="font-semibold text-primary-dark"> TOTAL: </span>
-              <span>
-                {{ order.total_price | formatCurrency }}
-              </span>
+            <hr />
+            <div class="flex items-center justify-end mt-6 mb-4">
+              <div class="min-w-[215px] text-right">
+                <span class="font-semibold text-primary-dark"> TOTAL: </span>
+                <span>
+                  {{ order.total_price | formatCurrency }}
+                </span>
+              </div>
             </div>
-          </div>
-        </CollapseContent>
+          </CollapseContent>
+        </div>
+        <div v-else class="text-center pt-20">
+          <h2 class="text-3xl font-semibold">
+            No hay pedidos abiertos actualmente
+          </h2>
+        </div>
       </tab>
       <tab name="Cerradas" size="lg">
-        <CollapseContent
-          :withShadow="true"
-          v-for="(order, i) in closedOrders"
-          :key="`${i}-${order.name}`"
-          class="mb-2"
-        >
-          <template v-slot:title>
-            <span class="text-lg font-semibold">{{ order.name }}</span>
-          </template>
-
-          <div
-            v-for="(product, index) in order.selected_products"
-            :key="`${index}-${product.id}`"
-            @click="openModalActions(order, product, i, index)"
-            class="mb-2 cursor-pointer hover:bg-gray-100 px-2 pb-2"
+        <div v-if="closedOrders.length > 0">
+          <CollapseContent
+            :withShadow="true"
+            v-for="(order, i) in closedOrders"
+            :key="`${i}-${order.name}`"
+            class="mb-2"
           >
-            <hr />
-            <div class="flex items-center justify-between mt-2">
-              <h4 class="font-medium">
-                {{ product.name }}
-              </h4>
-              <span class="font-semibold text-primary">
-                {{ product.price | formatCurrency }}
-              </span>
-            </div>
+            <template v-slot:title>
+              <span class="text-lg font-semibold">{{ order.name }}</span>
+            </template>
+
             <div
-              class="pl-2 text-gray-600 text-sm mt-3"
-              v-if="product.ingredients.length > 0"
+              v-for="(product, index) in order.selected_products"
+              :key="`${index}-${product.id}`"
+              @click="openModalActions(order, product, i, index)"
+              class="mb-2 cursor-pointer hover:bg-gray-100 px-2 pb-2"
             >
-              <p>{{ product.ingredients_text }}</p>
-              <p class="mt-2" v-if="product.comments_text">
-                <span class="font-semibold"> Comentarios: </span>
-                {{ product.comments_text }}
-              </p>
-            </div>
-          </div>
-          <hr />
-          <div class="flex items-center justify-between mt-6 mb-4">
-            <div>
-              <Button
-                variant="outline-success"
-                size="md"
-                class="mr-2"
-                @click="sendOrder(i)"
+              <hr />
+              <div class="flex items-center justify-between mt-2">
+                <h4 class="font-medium">
+                  {{ product.name }}
+                </h4>
+                <span class="font-semibold text-primary">
+                  {{ product.price | formatCurrency }}
+                </span>
+              </div>
+              <div
+                class="pl-2 text-gray-600 text-sm mt-3"
+                v-if="product.ingredients.length > 0"
               >
-                Enviar pedido
-              </Button>
-              <!-- <Button
+                <p>{{ product.ingredients_text }}</p>
+                <p class="mt-2" v-if="product.comments_text">
+                  <span class="font-semibold"> Comentarios: </span>
+                  {{ product.comments_text }}
+                </p>
+              </div>
+            </div>
+            <hr />
+            <div class="flex items-center justify-between mt-6 mb-4">
+              <div>
+                <Button
+                  variant="outline-success"
+                  size="md"
+                  class="mr-2"
+                  @click="sendOrder(i)"
+                >
+                  Enviar pedido
+                </Button>
+                <!-- <Button
             variant="outline-primary"
             size="md"
             class="mr-2"
@@ -141,23 +149,29 @@
           >
             Agregar producto
           </Button> -->
-              <Button
-                variant="outline-danger"
-                size="md"
-                @click="deleteOrder(i)"
-              >
-                Eliminar pedido
-              </Button>
-            </div>
+                <Button
+                  variant="outline-danger"
+                  size="md"
+                  @click="deleteOrder(i)"
+                >
+                  Eliminar pedido
+                </Button>
+              </div>
 
-            <div class="min-w-[215px] text-right">
-              <span class="font-semibold text-primary-dark"> TOTAL: </span>
-              <span>
-                {{ order.total_price | formatCurrency }}
-              </span>
+              <div class="min-w-[215px] text-right">
+                <span class="font-semibold text-primary-dark"> TOTAL: </span>
+                <span>
+                  {{ order.total_price | formatCurrency }}
+                </span>
+              </div>
             </div>
-          </div>
-        </CollapseContent>
+          </CollapseContent>
+        </div>
+        <div v-else class="text-center pt-20">
+          <h2 class="text-3xl font-semibold">
+            No hay pedidos cerrados actualmente
+          </h2>
+        </div>
       </tab>
     </tabs>
     <ModalActionsOrderViews
@@ -173,10 +187,12 @@
 </template>
 
 <script>
-import { getPrettyIngredients } from '~/assets/utils/ingredientsFormatter'
-import ModalActionsOrderViews from './Modals/ModalActionsOrderViews.vue'
+import { mapMutations } from 'vuex'
 
-// TODO: Agregar funcionalidad de eliminar producto
+import { formatErrorMessages } from '~/assets/utils/formatErrorMessage'
+import { getPrettyIngredients } from '~/assets/utils/ingredientsFormatter'
+import { generalStoreNames } from '~/store/general'
+import ModalActionsOrderViews from './Modals/ModalActionsOrderViews.vue'
 
 export default {
   name: 'OrdersView',
@@ -202,6 +218,9 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      showToast: generalStoreNames.mutations.showToast,
+    }),
     openModalActions(order, product, indexOrder, indexProduct) {
       this.orderSelected = order
       this.productSelected = product
@@ -255,8 +274,11 @@ export default {
         this.closedOrders = orders.filter((order) => !order.is_open)
         this.keyTabs = new Date().getTime()
       } catch (err) {
-        // TODO: Handle error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
       }
     },
     changeStatusOfTicket(status, { order, ticket }) {
@@ -330,8 +352,11 @@ export default {
             payload
           )
       } catch (err) {
-        // TODO: Handle error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
       }
 
       if (response) {
@@ -389,9 +414,21 @@ export default {
 
         this.$refs['modal-actions-products'].close()
       } catch (err) {
-        // TODO: Handle error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
       }
+    },
+    closedOrder({ order }) {
+      const indexOrder = this.openOrders.findIndex((ord) => ord.id === order.id)
+
+      if (indexOrder > -1) {
+        this.openOrders.splice(indexOrder, 1)
+      }
+
+      this.closedOrders.unshift(order)
     },
   },
   watch: {

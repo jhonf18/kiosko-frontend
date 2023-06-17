@@ -148,7 +148,6 @@ export default {
       loadIngredients: ingredientStoreNames.actions.load,
     }),
     searchIngredient() {
-      // TODO: Limpiar parametro de busqueda al dar click en la x, también despues de editar el perfil
       const search = normalizeText(this.search.toLowerCase())
       this.ingredients = this.ingredientsStore.filter((ingredient) => {
         const name = normalizeText(ingredient.name.toLocaleLowerCase())
@@ -178,6 +177,9 @@ export default {
         if (this.ingredientsStore) this.ingredients = this.ingredientsStore
       },
       inmediate: true,
+    },
+    search() {
+      if (this.search.length === 0) this.ingredients = this.ingredientsStore
     },
   },
 }

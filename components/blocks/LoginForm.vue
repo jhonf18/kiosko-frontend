@@ -96,7 +96,6 @@
 
 <script>
 import { mapMutations } from 'vuex'
-import { formatErrorMessages } from '~/assets/utils/formatErrorMessage'
 import { generalStoreNames } from '~/store/general'
 
 export default {
@@ -139,7 +138,7 @@ export default {
           ? err.response.data.error.message
           : 'Ha ocurrido un error inesperado en el servidor.'
         this.showToast({
-          text: formatErrorMessages(errorMessage),
+          text: errorMessage,
         })
       }
     },

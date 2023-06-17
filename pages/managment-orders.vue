@@ -7,6 +7,7 @@
         v-model="waiterSearch"
         placeholder="Buscar mesero"
         @keyUp="onWaiterSearch"
+        autocomplete="off"
         class="mr-2 w-full lg:col-span-2"
       ></Input>
       <SelectInput
@@ -137,18 +138,20 @@
 
 <script>
 import ModalInformationOrder from '@/components/blocks/Modals/ModalInformationOrder.vue'
+import { mapMutations } from 'vuex'
+import { formatErrorMessages } from '~/assets/utils/formatErrorMessage'
 import { normalizeText } from '~/assets/utils/normalize'
-
-// TODO: Falta finalizar orden y realizar conexión de eventos en tiempo real
+import { generalStoreNames } from '~/store/general'
 
 export default {
+  name: 'ManagmentOrders',
+  middleware: ['authLeader'],
   data() {
     return {
       waiterSearch: '',
       orders: [],
       openOrders: [],
       closedOrders: [],
-      waiters: [],
       filter: 'open',
       optionsFilter: [
         {
@@ -170,10 +173,21 @@ export default {
   async mounted() {
     this.handleSocket()
     await this.getOrders()
-    await this.getWaiters()
     this.onChangeFilter()
   },
   methods: {
+    ...mapMutations({
+      showToast: generalStoreNames.mutations.showToast,
+    }),
+    isValidBranchOffice(order) {
+      if (
+        !order.branch_office ||
+        order.branch_office.id !== this.$auth.user.branch_office
+      ) {
+        return false
+      }
+      return true
+    },
     handleSocket() {
       const TOKEN = localStorage.getItem('auth._token.local').split(' ')[1]
 
@@ -187,6 +201,10 @@ export default {
 
       this.socket.on('authenticated', () => {
         this.socket.on('new-order', ({ order, tickets }) => {
+          if (!this.isValidBranchOffice(order)) {
+            return
+          }
+
           const fullName = order.name
           const name = order.name.split('-')[0]
           order.name = name
@@ -234,6 +252,10 @@ export default {
         })
 
         this.socket.on('update-order', ({ order, ticket }) => {
+          if (!this.isValidBranchOffice(order)) {
+            return
+          }
+
           this.waiterSearch = ''
           const fullName = order.name
           const name = order.name.split('-')[0]
@@ -271,7 +293,7 @@ export default {
       })
     },
     async getOrders() {
-      const filter = `&sort_by=desc(created_at)`
+      const filter = `&sort_by=desc(created_at)&branch_office=${this.$auth.user.branch_office}`
       const getData =
         'name,is_open,created_at,total_price,id,branch_office,branch_office.id,selected_products.id,selected_products.ingredients,selected_products.name,selected_products.price,selected_products.category,selected_products.media_files,waiter.name,waiter.id,waiter.email,waiter.nickname'
       try {
@@ -297,26 +319,18 @@ export default {
         this.openOrders = orders.filter((order) => order.is_open)
         this.closedOrders = orders.filter((order) => !order.is_open)
       } catch (err) {
-        // TODO: Handle error
-        console.log(err)
-      }
-    },
-    async getWaiters() {
-      const filter = `branch_office=${this.$auth.user.branch_office}&role=ROLE_WAITER`
-      const getData = 'name,email,role,branch_office.name,id,'
-
-      try {
-        const waiters = await this.$userRepository.getAll({ getData, filter })
-
-        if (waiters) {
-          this.waiters = waiters
-        }
-      } catch (err) {
-        // Handle error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
       }
     },
     onEventDeleteProductInOrder({ order, ticket }) {
+      if (!this.isValidBranchOffice(order)) {
+        return
+      }
+
       const orderIndex = this.openOrders.findIndex(
         (orderItem) => orderItem.id === order.id
       )
@@ -385,6 +399,9 @@ export default {
       this.$refs['component-modal-information-order'].open()
     },
     onEventFinishedOrder({ order, ticket }) {
+      if (!this.isValidBranchOffice(order)) {
+        return
+      }
       const orderIndex = this.orders.findIndex(
         (orderItem) => orderItem.id === order.id
       )
@@ -443,11 +460,16 @@ export default {
           this.$refs['component-modal-information-order'].close()
 
           // emit event
-          this.socket.emit('close-order', { ...order, is_open: false })
+          this.socket.emit('close-order', {
+            order: { ...order, is_open: false },
+          })
         }
       } catch (err) {
-        // Handle error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
       }
     },
     async onDeleteOrder(order) {
@@ -474,8 +496,18 @@ export default {
         this.$refs['component-modal-information-order'].close()
         this.socket.emit('delete-order', { order })
       } catch (err) {
-        // Handle error
-        console.log(err)
+        this.showToast({
+          text: formatErrorMessages(err.message),
+          type: 'error',
+          visibleTime: 3,
+        })
+      }
+    },
+  },
+  watch: {
+    waiterSearch() {
+      if (this.waiterSearch.length === 0) {
+        this.onChangeFilter()
       }
     },
   },

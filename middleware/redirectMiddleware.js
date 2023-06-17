@@ -8,7 +8,7 @@ export default function ({ store, redirect }) {
     store.state.auth.loggedIn &&
     store.state.auth.user.role === 'ROLE_LEADER'
   ) {
-    return redirect('/dashboard-leaders')
+    return redirect('/managment-orders')
   } else if (
     store.state.auth.loggedIn &&
     store.state.auth.user.role === 'ROLE_WAITER'
@@ -19,5 +19,7 @@ export default function ({ store, redirect }) {
     ['ROLE_OVEN_COOK', 'ROLE_KITCHEN_COOK'].includes(store.state.auth.user.role)
   ) {
     return redirect('/tickets')
+  } else {
+    return redirect('/login')
   }
 }

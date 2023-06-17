@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { ingredientsFormatter } from '@/assets/utils/ingredientsFormatter'
+import { getPrettyIngredients } from '@/assets/utils/ingredientsFormatter'
 export default {
   name: 'SummaryProduct',
   props: {
@@ -82,29 +82,13 @@ export default {
     },
     setIngredients(product) {
       if (product.ingredients.length > 0) {
-        const formatter = new Intl.ListFormat('es', {
-          style: 'long',
-          type: 'conjunction',
-        })
-
-        const ingredientsFormated = ingredientsFormatter(product.ingredients)
-        const ingredientsNames = ingredientsFormated.map((ingredient) => {
-          let ingredientName = ''
-          if (ingredient.quantity) {
-            ingredientName += `${ingredient.quantity} `
-          }
-          ingredientName += ingredient.name
-
-          return ingredientName
-        })
-
-        this.ingredients = `${formatter.format(ingredientsNames)}.`
+        this.ingredients = getPrettyIngredients(product.ingredients)
       }
     },
   },
   watch: {
     product: {
-      handler: function (newVal, oldVal) {
+      handler: function (newVal) {
         this.setIngredients(newVal)
         this.setPassageSections(newVal)
       },

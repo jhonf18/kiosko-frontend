@@ -17,7 +17,11 @@
             <input
               type="checkbox"
               :id="variant.id"
-              :value="{ product_id: product.id, variant: variant.id, price: product.price }"
+              :value="{
+                product_id: product.id,
+                variant: variant.id,
+                price: product.price,
+              }"
               v-model="checkedProducts"
             />
             <label :for="variant.id">{{ variant.name }}</label>
@@ -41,8 +45,8 @@ export default {
     products: {
       type: Array,
       required: true,
-      default: []
-    }
+      default: [],
+    },
   },
   data() {
     return {
@@ -50,32 +54,28 @@ export default {
       onError: null,
       checkedProducts: [],
       token:
-        'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyZjc1N2M0Yy0yOWE0LTQ3NmMtYTFmYy0xOGY1YTkzNmExNmIiLCJpZCI6Ijk2MTM2OWVmLWVmOTktNDFjYi1hYWU5LWI4NTJlZDMyZjg2OSIsImlkX2JyYW5jaF9vZmZpY2UiOiJlZjU1MzU4Yi0zOTI2LTQ2YTYtYThhZS01ZDlhOTA3ZjAxY2MiLCJpYXQiOjE2NzgyMjA0ODMsImV4cCI6MTY3ODI4NTI4MywiYXVkIjoia2lvc2tvIn0.YvstlmhNJtI7XyVPMooKtQCGvKItHKpX0cIuR4lA1ElPLuj09SoRI9P1fO0JOwyNZ5Lk-inIvnu1I_LTbhXCyA'
-    };
+        'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyZjc1N2M0Yy0yOWE0LTQ3NmMtYTFmYy0xOGY1YTkzNmExNmIiLCJpZCI6Ijk2MTM2OWVmLWVmOTktNDFjYi1hYWU5LWI4NTJlZDMyZjg2OSIsImlkX2JyYW5jaF9vZmZpY2UiOiJlZjU1MzU4Yi0zOTI2LTQ2YTYtYThhZS01ZDlhOTA3ZjAxY2MiLCJpYXQiOjE2NzgyMjA0ODMsImV4cCI6MTY3ODI4NTI4MywiYXVkIjoia2lvc2tvIn0.YvstlmhNJtI7XyVPMooKtQCGvKItHKpX0cIuR4lA1ElPLuj09SoRI9P1fO0JOwyNZ5Lk-inIvnu1I_LTbhXCyA',
+    }
   },
   mounted() {
     this.socket = this.$nuxtSocket({
       name: 'main',
       auth: {
         token:
-          'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyZjc1N2M0Yy0yOWE0LTQ3NmMtYTFmYy0xOGY1YTkzNmExNmIiLCJpZCI6Ijk2MTM2OWVmLWVmOTktNDFjYi1hYWU5LWI4NTJlZDMyZjg2OSIsImlkX2JyYW5jaF9vZmZpY2UiOiJlZjU1MzU4Yi0zOTI2LTQ2YTYtYThhZS01ZDlhOTA3ZjAxY2MiLCJpYXQiOjE2NzgyMjA0ODMsImV4cCI6MTY3ODI4NTI4MywiYXVkIjoia2lvc2tvIn0.YvstlmhNJtI7XyVPMooKtQCGvKItHKpX0cIuR4lA1ElPLuj09SoRI9P1fO0JOwyNZ5Lk-inIvnu1I_LTbhXCyA'
-      }
-    });
+          'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyZjc1N2M0Yy0yOWE0LTQ3NmMtYTFmYy0xOGY1YTkzNmExNmIiLCJpZCI6Ijk2MTM2OWVmLWVmOTktNDFjYi1hYWU5LWI4NTJlZDMyZjg2OSIsImlkX2JyYW5jaF9vZmZpY2UiOiJlZjU1MzU4Yi0zOTI2LTQ2YTYtYThhZS01ZDlhOTA3ZjAxY2MiLCJpYXQiOjE2NzgyMjA0ODMsImV4cCI6MTY3ODI4NTI4MywiYXVkIjoia2lvc2tvIn0.YvstlmhNJtI7XyVPMooKtQCGvKItHKpX0cIuR4lA1ElPLuj09SoRI9P1fO0JOwyNZ5Lk-inIvnu1I_LTbhXCyA',
+      },
+    })
 
     this.socket.emit('authentication', {
       token:
-        'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyZjc1N2M0Yy0yOWE0LTQ3NmMtYTFmYy0xOGY1YTkzNmExNmIiLCJpZCI6Ijk2MTM2OWVmLWVmOTktNDFjYi1hYWU5LWI4NTJlZDMyZjg2OSIsImlkX2JyYW5jaF9vZmZpY2UiOiJlZjU1MzU4Yi0zOTI2LTQ2YTYtYThhZS01ZDlhOTA3ZjAxY2MiLCJpYXQiOjE2NzgyMjA0ODMsImV4cCI6MTY3ODI4NTI4MywiYXVkIjoia2lvc2tvIn0.YvstlmhNJtI7XyVPMooKtQCGvKItHKpX0cIuR4lA1ElPLuj09SoRI9P1fO0JOwyNZ5Lk-inIvnu1I_LTbhXCyA'
-    });
+        'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyZjc1N2M0Yy0yOWE0LTQ3NmMtYTFmYy0xOGY1YTkzNmExNmIiLCJpZCI6Ijk2MTM2OWVmLWVmOTktNDFjYi1hYWU5LWI4NTJlZDMyZjg2OSIsImlkX2JyYW5jaF9vZmZpY2UiOiJlZjU1MzU4Yi0zOTI2LTQ2YTYtYThhZS01ZDlhOTA3ZjAxY2MiLCJpYXQiOjE2NzgyMjA0ODMsImV4cCI6MTY3ODI4NTI4MywiYXVkIjoia2lvc2tvIn0.YvstlmhNJtI7XyVPMooKtQCGvKItHKpX0cIuR4lA1ElPLuj09SoRI9P1fO0JOwyNZ5Lk-inIvnu1I_LTbhXCyA',
+    })
 
-    this.socket.on('authenticated', () => {});
+    this.socket.on('authenticated', () => {})
 
-    this.socket.on('unauthorized', err => {
-      this.onError = err.message;
-    });
-
-    this.socket.on('error-to-create-order', err => {
-      console.log(err);
-    });
+    this.socket.on('unauthorized', (err) => {
+      this.onError = err.message
+    })
   },
   methods: {
     async takeOrder() {
@@ -83,29 +83,30 @@ export default {
         '/managment-orders/orders/create-order',
         {
           total_price: this.totalPrice,
-          products: this.checkedProducts
+          products: this.checkedProducts,
         },
         {
           headers: {
-            Authorization: `Bearer ${this.token}`
-          }
+            Authorization: `Bearer ${this.token}`,
+          },
         }
-      );
-
-      console.log(result.data.data[0]);
-      const order = result.data.data[0].order;
-      const tickets = result.data.data[0].tickets;
+      )
+      const order = result.data.data[0].order
+      const tickets = result.data.data[0].tickets
 
       this.socket.emit('create-order', {
         order,
-        tickets
-      });
-    }
+        tickets,
+      })
+    },
   },
   computed: {
     totalPrice() {
-      return this.checkedProducts.reduce((partialSum, value) => partialSum + value.price, 0);
-    }
-  }
-};
+      return this.checkedProducts.reduce(
+        (partialSum, value) => partialSum + value.price,
+        0
+      )
+    },
+  },
+}
 </script>

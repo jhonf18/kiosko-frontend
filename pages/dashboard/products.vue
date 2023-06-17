@@ -9,6 +9,7 @@
           v-model="search"
           placeholder="Buscar producto"
           @keyUp="searchProduct"
+          autocomplete="off"
           class="mr-2 w-full lg:col-span-2"
         ></Input>
         <SelectInput
@@ -157,8 +158,6 @@ import { productStoreNames } from '~/store/product'
 export default {
   layout: 'dashboard',
   data() {
-    // tabla con filtro de busqueda por palabra y por sucursales
-    // agregar, editar y eliminar productos
     return {
       products: [],
       search: '',
@@ -263,6 +262,11 @@ export default {
         }
       },
       inmediate: true,
+    },
+    search() {
+      if (this.search.length === 0) {
+        this.products = [...this.productsStore]
+      }
     },
   },
 }

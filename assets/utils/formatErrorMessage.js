@@ -1,5 +1,4 @@
 export const formatErrorMessages = (messages) => {
-  console.log(messages)
   if (Array.isArray(messages)) {
     const message = messages[0]
     const type = message.type.split('_')[1]

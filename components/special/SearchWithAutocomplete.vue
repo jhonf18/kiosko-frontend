@@ -217,7 +217,6 @@ export default {
           this.arrowCounter > 0 &&
           this.results.length > 3
         ) {
-          console.log(this.$refs.ulContainerList.childNodes)
           this.$refs.ulContainerList.childNodes[
             this.arrowCounter
           ].scrollIntoView(true)
