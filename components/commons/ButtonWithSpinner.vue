@@ -1,6 +1,6 @@
 <template>
-  <Button :variant="variant" @click="$emit('click')">
-    <span class="flex">
+  <Button :variant="variant" :size="size" @click="$emit('click')">
+    <span class="flex" :class="{ 'justify-center': textCenter }">
       <Spinner v-if="loading" :variant="color"></Spinner>
       {{ text }}
     </span>
@@ -37,6 +37,16 @@ export default {
       required: false,
       default: 'primary',
       validator: (value) => variants.includes(value),
+    },
+    size: {
+      type: String,
+      required: false,
+      default: 'md',
+    },
+    textCenter: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {

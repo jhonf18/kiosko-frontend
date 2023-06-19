@@ -198,6 +198,10 @@ export default {
             ticket,
           })
           this.headerTabs[2].hasNotification = true
+          const audioFile = require('@/assets/sounds/notification.mp3').default
+          const audio = new Audio(audioFile)
+          audio.volume = 1
+          audio.play()
         })
 
         this.socket.on('oven:finished-order', ({ order, ticket }) => {
@@ -212,6 +216,10 @@ export default {
             ticket,
           })
           this.headerTabs[2].hasNotification = true
+          const audioFile = require('@/assets/sounds/notification.mp3').default
+          const audio = new Audio(audioFile)
+          audio.volume = 1
+          audio.play()
         })
 
         this.socket.on('closed-order', this.onEventClosedOrder)

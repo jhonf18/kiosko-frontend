@@ -345,6 +345,10 @@ export default {
               this.openTickets.push(ticket)
             })
           this.keyOpenTickets++
+          const audioFile = require('@/assets/sounds/notification.mp3').default
+          const audio = new Audio(audioFile)
+          audio.volume = 1
+          audio.play()
         })
         this.socket.on('update-order', (ticket) => {
           if (!this.isValidTickets([ticket])) {
@@ -415,7 +419,7 @@ export default {
       }&today=${today.getTime()}`
 
       const getData =
-        'id,sections,product,comments,product.name,product.id,product.ingredients,product.price,order.comments,order.selected_products,waiter.id,waiter.name,waiter.email,order.total_price,order.id,order.name,date_accepted,date_finished'
+        'id,sections,product,comments,product.name,product.id,product.ingredients,product.price,order.comments,order.selected_products,waiter.id,waiter.name,waiter.email,order.total_price,order.id,order.name,date_accepted,date_finished,branch_office.id'
       let tickets = null
       try {
         tickets = await this.$ticketRepository.index({ getData, filter })

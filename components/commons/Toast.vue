@@ -70,6 +70,7 @@ export default {
         type: 'error',
       },
       timeout: () => {},
+      audio: null,
     }
   },
   mounted() {
@@ -83,6 +84,12 @@ export default {
     show() {
       this.visible = true
       this.startCountDown()
+      if (this.toastContent.type === 'default') {
+        const audioFile = require('@/assets/sounds/notification.mp3').default
+        const audio = new Audio(audioFile)
+        audio.volume = 1
+        audio.play()
+      }
     },
     startCountDown() {
       this.timeout = setTimeout(() => {

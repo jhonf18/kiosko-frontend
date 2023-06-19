@@ -78,15 +78,17 @@
               Recuérdame
             </label>
           </div>
-          <Button
+          <ButtonWithSpinner
             type="submit"
             variant="primary"
             size="lg-block"
             class="px-6 mt-8"
+            :loading="loading"
+            :text="buttonText"
             @click="signinUser"
+            :textCenter="true"
           >
-            Iniciar sesión
-          </Button>
+          </ButtonWithSpinner>
           <input type="submit" value="Submit" class="hidden" />
         </form>
       </div>
@@ -110,6 +112,8 @@ export default {
       password: '',
       rememberUser: false,
       nicknameIsSaved: false,
+      loading: false,
+      buttonText: 'Iniciar sesión',
     }
   },
   mounted() {
@@ -123,7 +127,22 @@ export default {
     ...mapMutations({
       showToast: generalStoreNames.mutations.showToast,
     }),
+    setLoading(state) {
+      this.loading = state
+      this.buttonText = state ? 'Iniciando sesión...' : 'Iniciar sesión'
+    },
     async signinUser() {
+      if (this.nickname === '' || this.password === '') {
+        this.showToast({
+          text: 'Debes ingresar tu nombre de usuario y contraseña.',
+        })
+        return
+      }
+
+      if (this.loading) return
+
+      this.setLoading(true)
+
       try {
         await this.$auth.loginWith('local', {
           data: { nickname: this.nickname, password: this.password },
@@ -140,6 +159,8 @@ export default {
         this.showToast({
           text: errorMessage,
         })
+      } finally {
+        this.setLoading(false)
       }
     },
     loginWithOtherNickname() {
