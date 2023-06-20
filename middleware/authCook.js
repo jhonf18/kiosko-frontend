@@ -1,10 +1,15 @@
 export default async function ({ $auth, redirect, store }) {
   const user = $auth.user
 
-  const ROLES_COOK = ['ROLE_OVEN_COOK', 'ROLE_KITCHEN_COOK']
-
-  if (!user || !ROLES_COOK.includes(user.role)) {
-    store.commit('general/showError', { text: 'Usuario no autenticado.' })
-    redirect('/login')
+  if (!user || !$auth.loggedIn) {
+    return redirect('/login')
+  } else {
+    if (user.role === 'ROLE_ADMIN') {
+      return redirect('/dashboard')
+    } else if (user.role === 'ROLE_LEADER') {
+      return redirect('/managment-orders')
+    } else if (user.role === 'ROLE_WAITER') {
+      return redirect('/orders')
+    }
   }
 }
