@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: Bebidas... -->
   <div
     class="max-w-6xl mx-auto mb-24 mt-7 relative px-6"
     :class="{ '!mt-[90px]': !category }"

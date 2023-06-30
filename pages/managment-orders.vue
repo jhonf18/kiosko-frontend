@@ -16,17 +16,6 @@
         v-model="filter"
         @change="onChangeFilter"
       ></SelectInput>
-      <!-- <div
-          class="lg:col-start-7 lg:col-span-2 lg:order-none flex justify-end"
-        >
-          <Button size="sm" variant="primary" @click="openModalAddProduct">
-            <span class="flex items-center w-full">
-              <PlusIcon></PlusIcon>
-              Agregar
-              <span class="hidden sm:inline-block">&ThinSpace; producto</span>
-            </span>
-          </Button>
-        </div> -->
     </div>
 
     <div class="relative overflow-x-auto w-full max-w-full mb-7">
@@ -126,6 +115,10 @@
         </h5>
       </div>
     </div>
+    <div class="w-full max-w-full text-right mr-2" v-if="filter === 'closed'">
+      <span class="font-bold text-primary text-lg"> TOTAL VENTAS: </span>
+      <span class="text-lg"> {{ salesTotal | formatCurrency }} </span>
+    </div>
 
     <ModalInformationOrder
       ref="component-modal-information-order"
@@ -163,7 +156,6 @@ export default {
           value: 'closed',
         },
       ],
-
       orderSelected: { selected_products: [] },
     }
   },
@@ -517,6 +509,13 @@ export default {
       if (this.waiterSearch.length === 0) {
         this.onChangeFilter()
       }
+    },
+  },
+  computed: {
+    salesTotal() {
+      return this.orders.reduce((acc, order) => {
+        return acc + order.total_price
+      }, 0)
     },
   },
 }
