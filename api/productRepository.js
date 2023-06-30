@@ -27,6 +27,21 @@ export const productRepository = ($axios) => ({
       }
     })
   },
+  createProductInAllBranchOffices(payload) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const result = await $axios.$post(
+          `/back-office/products-managment/create-product-in-all-branch-offices`,
+          payload
+        )
+        resolve(result.data)
+      } catch (err) {
+        if (err.response && err.response.data) {
+          reject(err.response.data.error)
+        }
+      }
+    })
+  },
 
   update(id, payload) {
     return new Promise(async (resolve, reject) => {

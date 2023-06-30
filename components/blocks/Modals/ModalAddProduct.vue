@@ -25,7 +25,33 @@
         </li>
       </ol>
     </Message>
-    <div class="grid md:grid-cols-2 gap-4 mb-4">
+    <hr />
+    <div class="mb-4 mt-4">
+      <h3 class="font-semibold mb-3">Utilidades</h3>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label
+            class="hover:cursor-pointer mr-2 mt-4 mb-4 text-sm"
+            for="create-in-all-branch-offices"
+          >
+            Crear producto para todas las sucursales
+          </label>
+          <input
+            class="w-4 h-4 text-primary-light rounded form-checkbox focus:ring-primary-light cursor-pointer"
+            type="checkbox"
+            v-model="createInAllBranchOffices"
+            id="create-in-all-branch-offices"
+          />
+        </div>
+        <div class="text-right">
+          <Button variant="primary" size="sm" @click="openModalImportProducts"
+            >Importar producto</Button
+          >
+        </div>
+      </div>
+    </div>
+    <hr />
+    <div class="grid md:grid-cols-2 gap-4 mb-4 mt-4">
       <Input
         label="Ingresa el nombre del producto"
         v-model="product.name"
@@ -98,6 +124,7 @@
       ></SearchPassingSectionsForm>
       <SearchIngredientsForm
         class="col-span-full mb-6"
+        :ingredientsSelectedStore="product.ingredients"
         @updateSelection="handleIngredientSelection"
       ></SearchIngredientsForm>
     </CollapseContent>
@@ -111,12 +138,17 @@
         :text="buttonText"
       ></ButtonWithSpinner>
     </div>
+    <ModalImportProducts
+      ref="modal-import-products"
+      @importProduct="onImportProduct"
+    ></ModalImportProducts>
   </Modal>
 </template>
 
 <script>
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { formatErrorMessages } from '~/assets/utils/formatErrorMessage'
+import ModalImportProducts from '~/components/blocks/Modals/ModalImportProducts.vue'
 import CollapseContent from '~/components/special/CollapseContent.vue'
 import SearchWithAutocomplete from '~/components/special/SearchWithAutocomplete.vue'
 import { branchOfficeStoreNames } from '~/store/branchOffice'
@@ -155,6 +187,7 @@ export default {
       buttonText: 'Crear producto',
       loading: false,
       nameRef: 'modal-add-product',
+      createInAllBranchOffices: false,
     }
   },
   components: {
@@ -163,6 +196,7 @@ export default {
     SearchPassingSectionsForm,
     SearchIngredientsForm,
     SummaryProduct,
+    ModalImportProducts,
   },
   computed: {
     ...mapGetters({
@@ -201,7 +235,11 @@ export default {
         // Upload image to cloudinary
         let urlImage
         if (this.product.imageFile) {
-          urlImage = await this.$uploadImages(this.product.imageFile)
+          if (!this.verifyUrlCloudinary(this.product.imageFile)) {
+            urlImage = await this.$uploadImages(this.product.imageFile)
+          } else {
+            urlImage = this.product.imageFile
+          }
         }
 
         let ingredients = null
@@ -213,24 +251,47 @@ export default {
           }))
         }
 
-        // Create product
-        const product = await this.$productRepository.create({
-          name: this.product.name,
-          price: Number(this.product.price),
-          media_files: urlImage ? [urlImage] : [],
-          active: true,
-          category: this.product.category,
-          subcategory: this.product.subcategory,
-          branch_office: this.product.branchOffice,
-          passage_sections:
-            this.product.passage_sections.length > 0
-              ? this.product.passage_sections
-              : null,
-          selected_ingredients: ingredients,
-        })
-        // Add product to store
-        this.addProduct(product)
-        this.close()
+        if (this.createInAllBranchOffices) {
+          // Create products
+          const products =
+            await this.$productRepository.createProductInAllBranchOffices({
+              name: this.product.name,
+              price: Number(this.product.price),
+              media_files: urlImage ? [urlImage] : [],
+              active: true,
+              category: this.product.category,
+              subcategory: this.product.subcategory,
+              branch_office: this.product.branchOffice,
+              passage_sections:
+                this.product.passage_sections.length > 0
+                  ? this.product.passage_sections
+                  : null,
+              selected_ingredients: ingredients,
+            })
+          // Add products to store
+          products.forEach((product) => this.addProduct(product))
+
+          this.close()
+        } else {
+          // Create product
+          const product = await this.$productRepository.create({
+            name: this.product.name,
+            price: Number(this.product.price),
+            media_files: urlImage ? [urlImage] : [],
+            active: true,
+            category: this.product.category,
+            subcategory: this.product.subcategory,
+            branch_office: this.product.branchOffice,
+            passage_sections:
+              this.product.passage_sections.length > 0
+                ? this.product.passage_sections
+                : null,
+            selected_ingredients: ingredients,
+          })
+          // Add product to store
+          this.addProduct(product)
+          this.close()
+        }
       } catch (error) {
         this.showToast({
           type: 'error',
@@ -275,7 +336,10 @@ export default {
         })
         return false
       }
-      if (this.product.branchOffice === null) {
+      if (
+        this.product.branchOffice === null &&
+        !this.createInAllBranchOffices
+      ) {
         this.showToast({
           type: 'error',
           text: 'La sucursal del producto es requerida',
@@ -284,6 +348,11 @@ export default {
       }
 
       return true
+    },
+    verifyUrlCloudinary(url) {
+      const reg = new RegExp('^(https:\\/\\/)?(res.cloudinary.com)|', 'i')
+
+      return url.match(reg)[1]
     },
     async onSelectImage(e) {
       const file = e.target.files[0]
@@ -353,7 +422,37 @@ export default {
     },
     handleIngredientSelection(ingredients) {
       this.product.ingredients = ingredients
-      this.$refs['collapse-content-add-product'].resizeNow()
+    },
+    onImportProduct(product) {
+      this.product.name = product.name
+      this.product.price = product.price
+      this.product.branchOffice = product.branch_office.id
+      this.product.passage_sections = product.passage_sections
+      this.product.ingredients = product.selected_ingredients
+      this.product.selected_ingredients = product.selected_ingredients
+      this.product.imagePreview = product.media_files[0]
+      this.product.imageFile = product.media_files[0]
+
+      const category = this.categoriesStore.find(
+        (c) => c.name === product.category
+      )
+      if (category) {
+        this.product.category = category.id
+      }
+
+      this.onSelectedCategory()
+
+      const subcategory = category.subcategories.find(
+        (s) => s === product.subcategory
+      )
+      if (subcategory) {
+        this.product.subcategory = subcategory
+      }
+
+      // this.$refs['collapse-content-add-product'].resizeNow()
+    },
+    openModalImportProducts() {
+      this.$refs['modal-import-products'].open()
     },
     async open() {
       this.$refs[`component-${this.nameRef}-${this.id}`].open()

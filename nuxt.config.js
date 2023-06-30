@@ -169,7 +169,7 @@ export default {
     cloudName: process.env.CLOUD_NAME_CLOUDINARY,
     apiKey: process.env.API_KEY_CLOUDINARY,
     apiSecret: process.env.API_SECRET_CLOUDINARY,
-    secure: process.env.NODe_ENV !== 'development',
+    secure: process.env.NODE_ENV !== 'development',
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

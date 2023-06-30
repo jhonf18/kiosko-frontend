@@ -149,8 +149,8 @@ export default {
     ingredientsStore() {
       this.ingredients = [...this.ingredientsStore]
     },
-    ingredientsSelectedStore() {
-      this.setIngredients(this.ingredientsSelectedStore)
+    ingredientsSelectedStore(newVal) {
+      this.setIngredients(newVal)
     },
   },
 }

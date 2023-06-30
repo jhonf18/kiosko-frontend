@@ -132,32 +132,6 @@
             </div>
             <hr />
             <div class="flex items-center justify-between mt-6 mb-4">
-              <div>
-                <Button
-                  variant="outline-success"
-                  size="md"
-                  class="mr-2"
-                  @click="sendOrder(i)"
-                >
-                  Enviar pedido
-                </Button>
-                <!-- <Button
-            variant="outline-primary"
-            size="md"
-            class="mr-2"
-            @click="addProductToOrder(i)"
-          >
-            Agregar producto
-          </Button> -->
-                <Button
-                  variant="outline-danger"
-                  size="md"
-                  @click="deleteOrder(i)"
-                >
-                  Eliminar pedido
-                </Button>
-              </div>
-
               <div class="min-w-[215px] text-right">
                 <span class="font-semibold text-primary-dark"> TOTAL: </span>
                 <span>
