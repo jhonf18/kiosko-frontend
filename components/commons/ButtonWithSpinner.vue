@@ -55,9 +55,12 @@ export default {
     }
   },
   mounted() {
-    if (this.variant === 'danger') {
+    if (this.variant === 'danger' || this.variant === 'outline-danger') {
       this.color = 'red'
-    } else if (this.variant === 'success') {
+    } else if (
+      this.variant === 'success' ||
+      this.variant === 'outline-success'
+    ) {
       this.color = 'green'
     }
   },

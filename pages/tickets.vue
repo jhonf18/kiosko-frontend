@@ -105,14 +105,24 @@
             </div>
             <hr />
             <div class="flex items-center justify-end mt-3 mb-2">
-              <Button
+              <ButtonWithSpinner
+                variant="primary"
+                size="md"
+                class="mr-2"
+                :loading="stateButtons[0].loading"
+                :text="stateButtons[0].buttonText"
+                @click="acceptTicket(ticket)"
+                :textCenter="true"
+              >
+              </ButtonWithSpinner>
+              <!-- <Button
                 variant="primary"
                 size="md"
                 class="mr-2"
                 @click="acceptTicket(ticket)"
               >
                 Comenzar a preparar
-              </Button>
+              </Button> -->
             </div>
           </CollapseContent>
         </div>
@@ -185,14 +195,24 @@
             </div>
             <hr />
             <div class="flex items-center justify-end mt-3 mb-2">
-              <Button
+              <ButtonWithSpinner
+                variant="success"
+                size="md"
+                class="mr-2"
+                :loading="stateButtons[1].loading"
+                :text="stateButtons[1].buttonText"
+                @click="finishTicket(ticket)"
+                :textCenter="true"
+              >
+              </ButtonWithSpinner>
+              <!-- <Button
                 variant="success"
                 size="md"
                 class="mr-2"
                 @click="finishTicket(ticket)"
               >
                 Finalizar preparación
-              </Button>
+              </Button> -->
             </div>
           </CollapseContent>
         </div>
@@ -295,6 +315,10 @@ export default {
       keyOpenTickets: 0,
       keyClosedTickets: 0,
       keyTicketsInProcess: 0,
+      stateButtons: [
+        { buttonText: 'Comenzar preparación', loading: false },
+        { buttonText: 'Finalizar preparación', loading: false },
+      ],
     }
   },
   mounted() {
@@ -305,6 +329,18 @@ export default {
     ...mapMutations({
       showToast: generalStoreNames.mutations.showToast,
     }),
+    setLoading(state, type) {
+      if (type === 0) {
+        this.stateButtons[0].buttonText = state
+          ? 'Comenzando preparación...'
+          : 'Comenzar preparación'
+      } else {
+        this.stateButtons[1].buttonText = state
+          ? 'Finalizando preparación...'
+          : 'Finalizar preparación'
+      }
+      this.stateButtons[type].loading = state
+    },
     isValidTickets(tickets) {
       return tickets.every(
         (ticket) =>
@@ -460,6 +496,10 @@ export default {
       }
     },
     async acceptTicket(ticket) {
+      if (this.stateButtons[0].loading) return
+
+      this.setLoading(true, 0)
+
       try {
         const response = this.$ticketRepository.updateStatus(ticket.id, {
           state: 'accepted',
@@ -484,9 +524,15 @@ export default {
           type: 'error',
           visibleTime: 3,
         })
+      } finally {
+        this.setLoading(false, 0)
       }
     },
     async finishTicket(ticket) {
+      if (this.stateButtons[1].loading) return
+
+      this.setLoading(true, 1)
+
       try {
         const response = await this.$ticketRepository.updateStatus(ticket.id, {
           state: 'finished',
@@ -512,6 +558,8 @@ export default {
           type: 'error',
           visibleTime: 3,
         })
+      } finally {
+        this.setLoading(false, 1)
       }
     },
   },

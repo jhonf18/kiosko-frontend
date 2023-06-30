@@ -133,14 +133,16 @@
               </div>
               <hr />
               <div class="flex items-center justify-end mt-6 mb-4">
-                <div>
-                  <Button
+                <div class="flex">
+                  <ButtonWithSpinner
                     variant="outline-primary"
                     size="sm"
+                    :loading="loading"
+                    :text="buttonText"
                     @click="addProductToSendedOrder(order, i)"
+                    :textCenter="true"
                   >
-                    Añadir producto a aquí
-                  </Button>
+                  </ButtonWithSpinner>
                 </div>
                 <div class="min-w-[215px] text-right">
                   <span class="font-semibold text-primary-dark"> TOTAL: </span>
@@ -203,6 +205,8 @@ export default {
       orderName: '',
       orders: [],
       sendedOrders: [],
+      loading: false,
+      buttonText: 'Añadir producto aquí',
     }
   },
   components: {
@@ -212,6 +216,10 @@ export default {
     ...mapMutations({
       showToast: generalStoreNames.mutations.showToast,
     }),
+    setLoading(state) {
+      this.loading = state
+      this.buttonText = state ? 'Añadiendo producto...' : 'Añadir producto aquí'
+    },
     open() {
       this.$refs[`component-${this.nameRef}`].open()
     },
@@ -339,6 +347,10 @@ export default {
       }
     },
     async addProductToSendedOrder(order, index) {
+      if (this.loading) return
+
+      this.setLoading(true)
+
       const payload = {
         product: this.product.id,
         ids_selected_ingredients: this.product.ingredients_selected.map(
@@ -360,6 +372,7 @@ export default {
           selected_products: data,
         })
       } catch (err) {
+        this.setLoading(false)
         this.showToast({
           text: formatErrorMessages(err.message),
           type: 'error',
@@ -383,6 +396,7 @@ export default {
             return ticket
           }),
         })
+        this.setLoading(false)
         this.close()
         this.$emit('finished', true)
       }

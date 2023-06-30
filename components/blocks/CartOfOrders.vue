@@ -41,23 +41,25 @@
         </div>
         <hr />
         <div class="flex items-center justify-between mt-6 mb-4">
-          <div>
-            <Button
+          <div class="flex">
+            <ButtonWithSpinner
+              variant="outline-success"
+              size="md"
+              class="mr-2"
+              :loading="loading"
+              :text="buttonText"
+              @click="sendOrder(i)"
+              :textCenter="true"
+            >
+            </ButtonWithSpinner>
+            <!-- <Button
               variant="outline-success"
               size="md"
               class="mr-2"
               @click="sendOrder(i)"
             >
               Enviar pedido
-            </Button>
-            <!-- <Button
-            variant="outline-primary"
-            size="md"
-            class="mr-2"
-            @click="addProductToOrder(i)"
-          >
-            Agregar producto
-          </Button> -->
+            </Button> -->
             <Button variant="outline-danger" size="md" @click="deleteOrder(i)">
               Eliminar pedido
             </Button>
@@ -114,6 +116,8 @@ export default {
       indexProduct: -1,
       indexOrder: -1,
       socket: null,
+      loading: false,
+      buttonText: 'Enviar pedido',
     }
   },
   mounted() {
@@ -124,6 +128,10 @@ export default {
     ...mapMutations({
       showToast: generalStoreNames.mutations.showToast,
     }),
+    setLoading(state) {
+      this.loading = state
+      this.buttonText = state ? 'Enviando pedido...' : 'Enviar pedido'
+    },
     findOrders() {
       const orders = JSON.parse(localStorage.getItem('cart'))
       if (orders) {
@@ -136,6 +144,10 @@ export default {
       this.findOrders()
     },
     async sendOrder(index) {
+      if (this.loading) return
+
+      this.setLoading(true)
+
       const order = this.orders[index]
 
       const orderToSend = {}
@@ -156,6 +168,7 @@ export default {
       try {
         response = await this.$orderRepository.create(orderToSend)
       } catch (err) {
+        this.setLoading(false)
         this.showToast({
           text: formatErrorMessages(err.message),
           type: 'error',
@@ -185,6 +198,7 @@ export default {
         // this.socket.emit('create-order', )
 
         this.deleteOrder(index)
+        this.setLoading(false)
       }
     },
     deleteOrder(indexOrder) {
