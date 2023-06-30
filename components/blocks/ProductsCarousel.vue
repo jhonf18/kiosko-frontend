@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: Bebidas... -->
   <div
     class="max-w-6xl mx-auto mb-24 mt-7 relative px-6"
     :class="{ '!mt-[90px]': !category }"
@@ -38,7 +39,7 @@
             </div>
             <div class="px-2 py-2">
               <h4 class="line-clamp-2 leading-5 font-semibold h-10">
-                {{ product.name }}
+                {{ product.name | formatProductName }}
               </h4>
               <p class="text-gray-600 text-sm line-clamp-4 h-20">
                 {{ product.ingredients }}
@@ -160,9 +161,24 @@ export default {
       this.$refs['modal-add-product-2-cart'].open()
     },
     selectedSubcategory(subcategory, index) {
-      this.productsStore = this.products.filter(
-        (product) => product.subcategory === subcategory.name
-      )
+      if (
+        subcategory.name.includes('Personal') ||
+        subcategory.name.includes('1 L') ||
+        subcategory.name.includes('2 L')
+      ) {
+        const juiceSize = subcategory.name.split('-')[1].trim()
+
+        this.productsStore = this.products.filter((product) => {
+          return (
+            product.subcategory === 'Jugos naturales' &&
+            product.name.includes(`-- ${juiceSize}`)
+          )
+        })
+      } else {
+        this.productsStore = this.products.filter(
+          (product) => product.subcategory === subcategory.name
+        )
+      }
 
       this.setProducts(this.productsStore, false)
 
@@ -190,14 +206,45 @@ export default {
       })
 
       if (setSubcategories) {
-        const subcategories = this.productsStore.map(
-          (product) => product.subcategory
-        )
-        this.subcategories = Array.from(new Set(subcategories)).map(
-          (subcategoryName) => {
-            return { active: false, name: subcategoryName }
+        let naturalJuices = {
+          personal: [],
+          oneLiter: [],
+          twoLiters: [],
+        }
+
+        let subcategories = this.productsStore.map((product) => {
+          const productName = product.name
+          if (productName.includes('Personal')) {
+            naturalJuices.personal.push(product)
+          } else if (productName.includes('1 Litro')) {
+            naturalJuices.oneLiter.push(product)
+          } else if (productName.includes('2 Litros')) {
+            naturalJuices.twoLiters.push(product)
           }
+          return product.subcategory
+        })
+        subcategories = Array.from(new Set(subcategories))
+        const naturalJuicesIndex = subcategories.findIndex(
+          (subcategory) => subcategory === 'Jugos naturales'
         )
+
+        if (naturalJuicesIndex > -1) {
+          subcategories.splice(naturalJuicesIndex, 1)
+          if (naturalJuices.personal.length > 0) {
+            subcategories.push('Jugo natural - Personal')
+          }
+          if (naturalJuices.oneLiter.length > 0) {
+            subcategories.push('Jugo natural - 1 L')
+          }
+          if (naturalJuices.twoLiters.length > 0) {
+            subcategories.push('Jugo natural - 2 L')
+          }
+        }
+
+        console.log(subcategories)
+        this.subcategories = subcategories.map((subcategoryName) => {
+          return { active: false, name: subcategoryName }
+        })
       }
       this.carouselKey = new Date().getTime()
     },
