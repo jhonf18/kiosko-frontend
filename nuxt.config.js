@@ -64,7 +64,10 @@ export default {
   },
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
-  buildModules: [],
+  buildModules: [
+    // https://www.npmjs.com/package/@nuxtjs/svg
+    '@nuxtjs/svg'
+  ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
@@ -76,8 +79,6 @@ export default {
     'nuxt-socket-io',
     //https://auth.nuxtjs.org
     '@nuxtjs/auth',
-    // https://www.npmjs.com/package/@nuxtjs/svg
-    '@nuxtjs/svg',
     // https://cloudinary.nuxtjs.org
     '@nuxtjs/cloudinary',
   ],
