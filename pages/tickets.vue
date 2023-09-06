@@ -83,17 +83,6 @@
 
               <div
                 class="pl-2 text-gray-600 text-base mt-3"
-                v-if="ticket.comments_text"
-              >
-                <h4 class="font-semibold text-lg">Comentarios</h4>
-
-                <p class="pl-1">
-                  {{ ticket.comments_text }}
-                </p>
-              </div>
-
-              <div
-                class="pl-2 text-gray-600 text-base mt-3"
                 v-if="ticket.waiter"
               >
                 <h4 class="font-semibold text-lg">Mesero</h4>
@@ -102,7 +91,24 @@
                   {{ ticket.waiter.name }}
                 </p>
               </div>
+
+              <div
+                class="pl-2 text-gray-600 text-base mt-3"
+                v-if="ticket.comments_text"
+              >
+                <h4
+                  class="font-semibold text-lg text-green-600 flex items-center"
+                >
+                  <AlarmIcon class="w-6 h-6 stroke-current" />
+                  <span>Comentarios</span>
+                </h4>
+
+                <p class="pl-1">
+                  {{ ticket.comments_text }}
+                </p>
+              </div>
             </div>
+
             <hr />
             <div class="flex items-center justify-end mt-3 mb-2">
               <ButtonWithSpinner
@@ -115,14 +121,6 @@
                 :textCenter="true"
               >
               </ButtonWithSpinner>
-              <!-- <Button
-                variant="primary"
-                size="md"
-                class="mr-2"
-                @click="acceptTicket(ticket)"
-              >
-                Comenzar a preparar
-              </Button> -->
             </div>
           </CollapseContent>
         </div>
@@ -563,6 +561,9 @@ export default {
       }
     },
   },
-  components: { BottomTabs },
+  components: {
+    BottomTabs,
+    AlarmIcon: () => import('@/static/icons/alarm.svg?inline'),
+  },
 }
 </script>

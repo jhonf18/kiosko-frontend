@@ -268,22 +268,9 @@ export default {
         totalPrice += product.price
       }
 
-      const options = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        hour12: false,
-      }
-
       const cart = [
         {
-          name: `${this.orderName} - ${new Intl.DateTimeFormat(
-            'es-Es',
-            options
-          ).format(new Date())}`,
+          name: `${this.orderName}`,
           waiter: this.$auth.user.id,
           products,
           total: totalPrice,
