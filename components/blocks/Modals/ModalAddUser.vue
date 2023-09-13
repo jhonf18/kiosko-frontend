@@ -13,7 +13,6 @@
         idInput="add-user-name"
         validations="true"
         required="true"
-        typeValidation="name"
         type="text"
         placeholder="Nombre"
         invalidMessage="El nombre ingresado no es válido."
