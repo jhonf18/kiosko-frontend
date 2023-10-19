@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: Agregar el histórico de ventas en un periodo de tiempo dado -->
   <div class="mt-6 px-6">
     <div class="grid grid-cols-2 lg:grid-cols-8 gap-2 mb-5">
       <Input
