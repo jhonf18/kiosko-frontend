@@ -133,7 +133,7 @@ export default {
       try {
         const products = await this.$productRepository.index({
           getData:
-            'name,price,id,category,subcategory,passage_sections,media_files,branch_office.id,branch_office.name,branch_office.address,selected_ingredients.id,selected_ingredients.name,selected_ingredients.type',
+            'name,price,id,category,subcategory,passage_sections,media_files,branch_office.id,branch_office.name,branch_office.address,selected_ingredients.id,selected_ingredients.name,selected_ingredients.type,can_change_price',
           filter: `branch_office=${this.$auth.user.branch_office}`,
         })
         this.products = products

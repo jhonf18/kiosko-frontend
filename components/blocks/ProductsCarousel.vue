@@ -240,7 +240,6 @@ export default {
           }
         }
 
-        console.log(subcategories)
         this.subcategories = subcategories.map((subcategoryName) => {
           return { active: false, name: subcategoryName }
         })

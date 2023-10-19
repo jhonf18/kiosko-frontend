@@ -111,6 +111,20 @@
           class="rounded cursor-pointer block w-full text-sm border text-gray-500 file:mr-2 file:py-2.5 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-primary-light file:text-white"
         />
       </div>
+      <div>
+        <input
+          class="w-4 h-4 text-primary-light rounded form-checkbox focus:ring-primary-light cursor-pointer"
+          type="checkbox"
+          v-model="product.canChangePrice"
+          id="can-change-price"
+        />
+        <label
+          class="hover:cursor-pointer mr-2 mt-4 mb-4 text-base"
+          for="can-change-price"
+        >
+          Precio modificable
+        </label>
+      </div>
     </div>
 
     <CollapseContent
@@ -180,6 +194,7 @@ export default {
         imagePreview: null,
         passage_sections: [],
         ingredients: [],
+        canChangePrice: false,
       },
       categories: [],
       subcategories: [{ name: 'Subcategoría', value: null }],
@@ -267,6 +282,7 @@ export default {
                   ? this.product.passage_sections
                   : null,
               selected_ingredients: ingredients,
+              can_change_price: this.product.canChangePrice,
             })
           // Add products to store
           products.forEach((product) => this.addProduct(product))
@@ -287,6 +303,7 @@ export default {
                 ? this.product.passage_sections
                 : null,
             selected_ingredients: ingredients,
+            can_change_price: this.product.canChangePrice,
           })
           // Add product to store
           this.addProduct(product)

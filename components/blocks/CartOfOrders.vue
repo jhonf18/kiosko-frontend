@@ -160,6 +160,7 @@ export default {
             (ingredient) => ingredient.id
           ),
           comments: product.comments,
+          price: product.price,
         }
       })
 

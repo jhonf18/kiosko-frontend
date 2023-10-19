@@ -344,6 +344,7 @@ export default {
           (ingredient) => ingredient.id
         ),
         comments: this.product.comments,
+        price: this.product.price,
       }
 
       let data = []

@@ -150,6 +150,17 @@
         ></Input>
       </div>
 
+      <div v-if="product.can_change_price">
+        <Input
+          idInput="change-price"
+          :placeholder="product.price.toString()"
+          type="number"
+          class="mb-4"
+          label="Cambia de precio el plato"
+          v-model="newPrice"
+        ></Input>
+      </div>
+
       <Button
         variant="primary"
         size="block"
@@ -186,6 +197,7 @@ export default {
       selectedIngredients: [],
       meatTerm: '',
       comments: '',
+      newPrice: '',
     }
   },
   components: {
@@ -205,6 +217,7 @@ export default {
       // this.selectedIngredients = []
       this.meatTerm = ''
       this.comments = ''
+      this.newPrice = ''
     },
     open() {
       this.$refs[`component-${this.nameRef}`].open()
@@ -219,6 +232,11 @@ export default {
   },
   computed: {
     productToSaved() {
+      const newPrice =
+        this.newPrice != '' && this.newPrice > 0
+          ? this.newPrice
+          : this.product.price
+
       return {
         ...this.product,
         ingredients_selected:
@@ -228,6 +246,7 @@ export default {
         ...(this.meatTerm && {
           comments: `${this.meatTerm}--${this.comments}`,
         }),
+        price: new Number(newPrice),
         quantity: this.quantity,
       }
     },

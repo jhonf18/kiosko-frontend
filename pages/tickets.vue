@@ -69,7 +69,7 @@
                   {{ ticket.product.name }}
                 </h4>
                 <span class="font-semibold text-primary">
-                  {{ ticket.product.price | formatCurrency }}
+                  {{ (ticket.price || ticket.product.price) | formatCurrency }}
                 </span>
               </div>
               <div
@@ -105,6 +105,11 @@
 
                 <p class="pl-1">
                   {{ ticket.comments_text }}
+                  <span v-if="ticket.price !== ticket.product.price">
+                    - <strong>IMPORTANTE:</strong> El plato tiene un precio de
+                    {{ ticket.price | formatCurrency }}
+                    (<em>distinto al original</em>)
+                  </span>
                 </p>
               </div>
             </div>
@@ -453,7 +458,7 @@ export default {
       }&today=${today.getTime()}`
 
       const getData =
-        'id,sections,product,comments,product.name,product.id,product.ingredients,product.price,order.comments,order.selected_products,waiter.id,waiter.name,waiter.email,order.total_price,order.id,order.name,date_accepted,date_finished,branch_office.id'
+        'id,sections,product,comments,product.name,product.id,product.ingredients,product.price,order.comments,order.selected_products,waiter.id,waiter.name,waiter.email,order.total_price,order.id,order.name,date_accepted,date_finished,branch_office.id,price'
       let tickets = null
       try {
         tickets = await this.$ticketRepository.index({ getData, filter })
